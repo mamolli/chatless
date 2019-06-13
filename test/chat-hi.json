@@ -1,0 +1,97 @@
+{
+    "resource": "/pybot",
+    "path": "/pybot",
+    "httpMethod": "POST",
+    "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip,deflate",
+        "Content-Type": "application/json",
+        "Host": "vfh2hmjf06.execute-api.us-east-1.amazonaws.com",
+        "User-Agent": "Slackbot 1.0 (+https://api.slack.com/robots)",
+        "X-Amzn-Trace-Id": "Root=1-5d024534-865c5e1ae1006784c9144e24",
+        "X-Forwarded-For": "3.82.203.202",
+        "X-Forwarded-Port": "443",
+        "X-Forwarded-Proto": "https",
+        "X-Slack-Request-Timestamp": "1560429876",
+        "X-Slack-Retry-Num": "2",
+        "X-Slack-Retry-Reason": "http_error",
+        "X-Slack-Signature": "v0=d26a0d663e148eb3535219cc57b917aef8e7decbbe48fe70f3e9373e72373a68"
+    },
+    "multiValueHeaders": {
+        "Accept": [
+            "*/*"
+        ],
+        "Accept-Encoding": [
+            "gzip,deflate"
+        ],
+        "Content-Type": [
+            "application/json"
+        ],
+        "Host": [
+            "vfh2hmjf06.execute-api.us-east-1.amazonaws.com"
+        ],
+        "User-Agent": [
+            "Slackbot 1.0 (+https://api.slack.com/robots)"
+        ],
+        "X-Amzn-Trace-Id": [
+            "Root=1-5d024534-865c5e1ae1006784c9144e24"
+        ],
+        "X-Forwarded-For": [
+            "3.82.203.202"
+        ],
+        "X-Forwarded-Port": [
+            "443"
+        ],
+        "X-Forwarded-Proto": [
+            "https"
+        ],
+        "X-Slack-Request-Timestamp": [
+            "1560429876"
+        ],
+        "X-Slack-Retry-Num": [
+            "2"
+        ],
+        "X-Slack-Retry-Reason": [
+            "http_error"
+        ],
+        "X-Slack-Signature": [
+            "v0=d26a0d663e148eb3535219cc57b917aef8e7decbbe48fe70f3e9373e72373a68"
+        ]
+    },
+    "queryStringParameters": null,
+    "multiValueQueryStringParameters": null,
+    "pathParameters": null,
+    "stageVariables": null,
+    "requestContext": {
+        "resourceId": "ehom0h",
+        "resourcePath": "/pybot",
+        "httpMethod": "POST",
+        "extendedRequestId": "bN_AIGc1IAMF6NA=",
+        "requestTime": "13/Jun/2019:12:44:36 +0000",
+        "path": "/default/pybot",
+        "accountId": "622177633957",
+        "protocol": "HTTP/1.1",
+        "stage": "default",
+        "domainPrefix": "vfh2hmjf06",
+        "requestTimeEpoch": 1560429876093,
+        "requestId": "001e8359-8dd9-11e9-857a-4bb4dd0afad8",
+        "identity": {
+            "cognitoIdentityPoolId": null,
+            "accountId": null,
+            "cognitoIdentityId": null,
+            "caller": null,
+            "sourceIp": "3.82.203.202",
+            "principalOrgId": null,
+            "accessKey": null,
+            "cognitoAuthenticationType": null,
+            "cognitoAuthenticationProvider": null,
+            "userArn": null,
+            "userAgent": "Slackbot 1.0 (+https://api.slack.com/robots)",
+            "user": null
+        },
+        "domainName": "vfh2hmjf06.execute-api.us-east-1.amazonaws.com",
+        "apiId": "vfh2hmjf06"
+    },
+    "body": "{\"token\":\"JfzqLs1D9QCxCvrIjzmcuIrQ\",\"team_id\":\"TK2790QNN\",\"api_app_id\":\"AKGKCHT6K\",\"event\":{\"client_msg_id\":\"2022d4ab-582b-45d3-9786-ea9433838bdd\",\"type\":\"message\",\"text\":\"hello\",\"user\":\"UKFR4P92A\",\"ts\":\"1560429815.003100\",\"channel\":\"DK8DLGUE5\",\"event_ts\":\"1560429815.003100\",\"channel_type\":\"im\"},\"type\":\"event_callback\",\"event_id\":\"EvKKTW0D71\",\"event_time\":1560429815,\"authed_users\":[\"UK3BS2V1Q\"]}",
+    "isBase64Encoded": false
+}
