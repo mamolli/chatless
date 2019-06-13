@@ -10,7 +10,28 @@ STATUS_BAD = 504
 # map over several words from tuple if any of matches
 
 # example api
-# lunch bot
+# @lunchbot hi/hello/help/man/how
+
+# @lunchbot add venue
+# creates venue name and adds #number
+# -> returns a list of venues
+
+# @lunchbot remove venue/number
+# selfexplanatory
+# -> returns a list of venues
+
+
+# @lunchbot vote vanue/number
+# only one vote per user
+# -> returns current state of voting
+# lunchbot: 
+# 
+# #4 KiK [votes: reksio, debil]
+
+
+# TODO: make better abstractions
+
+
 
 MAPPER = {
     r"hi": defunct,
