@@ -1,0 +1,20 @@
+Transform: 'AWS::Serverless-2016-10-31'
+Resources:
+  TFunction:
+    # This resource creates a Lambda function.
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Runtime: python3.7
+      # This is the Lambda function's handler.
+      Handler: chatbot.handle
+      # The location of the Lambda function code.
+      # Event sources to attach to this function. In this case, we are attaching
+      # one API Gateway endpoint to the Lambda function. The function is
+      # called when a HTTP request is made to the API Gateway endpoint.
+      Events:
+        TApi:
+            # Define an API Gateway endpoint which responds to HTTP GET at /thumbnail
+            Type: Api
+            Properties:
+                Path: /test
+                Method: GET
