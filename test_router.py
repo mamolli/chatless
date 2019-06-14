@@ -11,7 +11,7 @@ def test_routing():
     assert len(router.REGISTRY) == 1
 
 def test_routing_params():
-    @router.match('hello (\S+)')
+    @router.match(r'hello (\S+)')
     def hi2(message, user, param):
         print("out")
         return param

@@ -5,7 +5,7 @@ REGISTRY = []
 # avoid OOP at all costs
 def match(regex):
     def regex_deco(action):
-        def fu(message=None, user=None, *params):
+        def fu(message=None, user=None, channel=None, *params):
             return action(message, user, *params)
         # validate regex
         rx = validate_regex(regex)
@@ -23,12 +23,11 @@ def validate_regex(regex):
         rx = None
     return rx
 
-def route(message, user):
+def route(message, user, channel):
     for regex, action in REGISTRY:
-        params = [ p for p in re.findall(regex, message) if p ] 
-        re.search(regex)
-        if params:
-            print("oddstring$$$ {} {} {} {}".format(action, message, user, params))
-            values = action(message, user, *params)
+        m = re.search(regex, message)
+        if m:
+            params = m.groups()
+            values = action(message, user, channel, *params)
             return values
 
