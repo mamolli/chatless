@@ -6,7 +6,7 @@ REGISTRY = []
 def match(regex):
     def regex_deco(action):
         def fu(message=None, user=None, channel=None, *params):
-            return action(message, user, *params)
+            return action(message, user, channel, *params)
         # validate regex
         rx = validate_regex(regex)
         if rx:
@@ -31,3 +31,45 @@ def route(message, user, channel):
             values = action(message, user, channel, *params)
             return values
 
+#SECTION MOVED FROM CHATBOT
+
+def load_event(event):
+    body = json.loads(event['body'])    
+    return body
+
+def is_bot_message(json_event):
+    if json_event['event'].get('subtype') == "bot_message":
+        return True
+    return False
+
+def extract_crucial(json_event):
+    message = json_event['event']['text']
+    channel = json_event['event']['channel']
+    user = json_event['event']['user']
+    return message, channel, user
+
+    
+def reply(message, channel):
+    data = urllib.parse.urlencode(
+        (
+            ("token", BOT_OAUTH),
+            ("channel", channel),
+            ("text", message)
+        )
+    )
+    data = data.encode("ascii")
+    
+    # Construct the HTTP request that will be sent to the Slack API.
+    request = urllib.request.Request(
+        SLACK_URL, 
+        data=data, 
+        method="POST"
+    )
+    # Add a header mentioning that the text is URL-encoded.
+    request.add_header(
+        "Content-Type", 
+        "application/x-www-form-urlencoded"
+    )
+    
+    # Fire off the request!
+    urllib.request.urlopen(request).read()
