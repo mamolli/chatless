@@ -29,13 +29,18 @@ def validate_regex(regex):
     return rx
 
 def route(message, user, channel):
-    print(REGISTRY)
     for regex, action in REGISTRY:
         m = re.search(regex, message)
         if m:
             params = m.groups()
             # inspect.signature(action).parameters.get('message')
-            values = action(message, user, channel, *params)
+            event = {
+                'message': message,
+                'user': user,
+                'channel': channel,
+                'params': params
+                }
+            values = action(event)
             return values
 
 #SECTION MOVED FROM CHATBOT
@@ -50,7 +55,6 @@ def handle_event(event, bot_ouath, slack_url):
         return 
     message, channel, user = extract_crucial(json_event)
     response = {"m": message, "C": channel, "u": user}
-    print("ROOOOOOOYUTING")
     reply_message = route(message, user, channel)
     reply("siemanko bot: {}".format(reply_message), channel, bot_ouath, slack_url)
 

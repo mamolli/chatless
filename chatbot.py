@@ -32,8 +32,10 @@ SLACK_URL = "https://slack.com/api/chat.postMessage"
 
 # TODO: make better abstractions
 
+# Overall I think an interface of func(event) is probably the easiest one to handle
+# event is simply a dict with detail about the environment, so regex matches etc
 @router.match(r"/hi|hello|man|help|docs/")
-def show_help(message, user, channel):
+def show_help(event):
     print("showing help")
     return "siemano dziwko"
 
