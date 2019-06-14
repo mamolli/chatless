@@ -5,28 +5,30 @@ REGISTRY = []
 # avoid OOP at all costs
 def match(regex):
     def regex_deco(action):
-        def fu(message=None, user=None):
-            return action(message, user)
+        def fu(message=None, user=None, *params):
+            return action(message, user, *params)
         # validate regex
-        if validate_regex(regex):
-            REGISTRY.append(regex, fu)
+        rx = validate_regex(regex)
+        if rx:
+            exec_pair = (rx, fu)
+            REGISTRY.append(exec_pair)
         return fu
     return regex_deco
 
-@match('rego')
-def out(message, user):
-    print("out")
-    return 1
 
 def validate_regex(regex):
     try:
-        re.compile(regex)
-        valid = True
+        rx = re.compile(regex)
     except re.error:
-        valid = False
-    return valid
+        rx = None
+    return rx
 
 def route(message, user):
-    for action in REGISTRY:
+    for regex, action in REGISTRY:
+        params = [ p for p in re.findall(regex, message) if p ] 
+        re.search(regex)
+        if params:
+            print("oddstring$$$ {} {} {} {}".format(action, message, user, params))
+            values = action(message, user, *params)
+            return values
 
-print(REGISTRY[0]())

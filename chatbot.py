@@ -1,6 +1,7 @@
 import json
 import re
 import enum
+import router
 
 STATUS_OK = 200
 STATUS_BAD = 504
@@ -31,26 +32,28 @@ STATUS_BAD = 504
 
 # TODO: make better abstractions
 
+@router.match(r"/hi|hello|man|help|docs/")
 def show_help():
     print("showing help")
 
+@router.match(r"")
 def add_venue():
     print("adding venue")
 
 def add_vote():
     print("adding vote")
 
-PARSE = { 
-    r'add (\S+)': add_venue,
-    r'vote (\S+)': add_vote,
-    r'/hi|hello|man|help|how/': show_help,
-    []: show_help
- }
+# PARSE = { 
+#     r'add (\S+)': add_venue,
+#     r'vote (\S+)': add_vote,
+#     r'/hi|hello|man|help|how/': show_help,
+#     []: show_help
+#   }
 
-def route(message, parse_map):
-    for parse_map_item in parse_map.items():
-        rex, fmap = parse_map_item 
-        print(re.findall(rex, message))
+# def route(message, parse_map):
+#     for parse_map_item in parse_map.items():
+#         rex, fmap = parse_map_item 
+#         print(re.findall(rex, message))
 
 def extract_message(event):
     return json.loads(event['body'])['event']['text']
@@ -60,7 +63,6 @@ def handle(event, context):
     # print(vars(context))
     message = extract_message(event)
     response = {'none': 'non'}
-    route(message, PARSE)
     return respond(STATUS_OK, response)
 
 def handle_challenge_simple(body):
