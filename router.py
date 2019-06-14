@@ -40,7 +40,7 @@ def route(message, user, channel):
                 'channel': channel,
                 'params': params
                 }
-            values = action(event)
+            values = action(bot_event=event)
             return values
 
 #SECTION MOVED FROM CHATBOT
@@ -57,6 +57,7 @@ def handle_event(event, bot_ouath, slack_url):
     response = {"m": message, "C": channel, "u": user}
     reply_message = route(message, user, channel)
     reply("siemanko bot: {}".format(reply_message), channel, bot_ouath, slack_url)
+    return respond(STATUS_OK, {"x": "x"})
 
 def load_event(event):
     body = json.loads(event['body'])    
@@ -75,6 +76,7 @@ def extract_crucial(json_event):
 
     
 def reply(message, channel, bot_ouath, slack_url):
+
     data = urllib.parse.urlencode(
         (
             ("token", bot_ouath),
@@ -98,3 +100,13 @@ def reply(message, channel, bot_ouath, slack_url):
     
     # Fire off the request!
     urllib.request.urlopen(request).read()
+
+def respond(status, response_body):
+    return {
+        "statusCode": status,
+        "body": json.dumps(response_body),
+        "headers": {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": '*'
+            },
+        }

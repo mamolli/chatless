@@ -3,7 +3,7 @@ import router
 
 def test_routing():
     @router.match('hi')
-    def hi(message, user, channel):
+    def hi(bot_event):
         print("out")
         return 1
 
@@ -12,9 +12,9 @@ def test_routing():
 
 def test_routing_params():
     @router.match(r'hello (\S+)')
-    def hi2(message, user, channel, param):
+    def hi2(bot_event):
         print("out")
-        return param
+        return bot_event['params'][0]
 
     assert router.route("hello there", "chann", "me") == "there"
     assert len(router.REGISTRY) == 2

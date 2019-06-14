@@ -35,27 +35,13 @@ SLACK_URL = "https://slack.com/api/chat.postMessage"
 # Overall I think an interface of func(event) is probably the easiest one to handle
 # event is simply a dict with detail about the environment, so regex matches etc
 @router.match(r"/hi|hello|man|help|docs/")
-def show_help(event):
+def show_help(bot_event):
     print("showing help")
     return "siemano dziwko"
 
 
 def handle(event, context):
     print(json.dumps(event))
-    # print(vars(context))
-    router.handle_event(event, BOT_OAUTH, SLACK_URL)
-    return respond(STATUS_OK, {"x": "x"})
+    return router.handle_event(event, BOT_OAUTH, SLACK_URL)
 
-# def handle_challenge_simple(body):
-    # response = {"challenge": json.loads(event['body'])['challenge']}
-
-def respond(status, response_body):
-    return {
-        "statusCode": status,
-        "body": json.dumps(response_body),
-        "headers": {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": '*'
-            },
-        }
 
