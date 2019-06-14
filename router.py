@@ -1,4 +1,7 @@
 import re
+import urllib.parse
+import urllib.request
+import json
 
 REGISTRY = []
 
@@ -33,6 +36,19 @@ def route(message, user, channel):
 
 #SECTION MOVED FROM CHATBOT
 
+STATUS_OK = 200
+STATUS_BAD = 504
+
+
+def handle_event(event, bot_ouath, slack_url):
+    json_event = load_event(event)
+    if is_bot_message(json_event):
+        return 
+    message, channel, user = extract_crucial(json_event)
+    response = {"m": message, "C": channel, "u": user}
+    reply_message = route(message, user, channel)
+    reply("siemanko bot: {}".format(reply_message), channel, bot_ouath, slack_url)
+
 def load_event(event):
     body = json.loads(event['body'])    
     return body
@@ -49,7 +65,7 @@ def extract_crucial(json_event):
     return message, channel, user
 
     
-def reply(message, channel):
+def reply(message, channel, bot_ouath, slack_url):
     data = urllib.parse.urlencode(
         (
             ("token", BOT_OAUTH),
@@ -61,7 +77,7 @@ def reply(message, channel):
     
     # Construct the HTTP request that will be sent to the Slack API.
     request = urllib.request.Request(
-        SLACK_URL, 
+        slack_url, 
         data=data, 
         method="POST"
     )
