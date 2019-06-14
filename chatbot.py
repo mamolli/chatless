@@ -33,7 +33,7 @@ SLACK_URL = "https://slack.com/api/chat.postMessage"
 # TODO: make better abstractions
 
 @router.match(r"/hi|hello|man|help|docs/")
-def show_help():
+def show_help(message, user, channel):
     print("showing help")
     return "siemano dziwko"
 

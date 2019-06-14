@@ -1,3 +1,4 @@
+import inspect
 import re
 import urllib.parse
 import urllib.request
@@ -8,8 +9,9 @@ REGISTRY = []
 # avoid OOP at all costs
 def match(regex):
     def regex_deco(action):
-        def fu(message=None, user=None, channel=None, *params):
-            return action(message, user, channel, *params)
+        # def fu(message=None, user=None, channel=None, *params):
+        def fu(*args, **kwargs):
+            return action(*args, **kwargs)
         # validate regex
         rx = validate_regex(regex)
         if rx:
@@ -27,10 +29,12 @@ def validate_regex(regex):
     return rx
 
 def route(message, user, channel):
+    print(REGISTRY)
     for regex, action in REGISTRY:
         m = re.search(regex, message)
         if m:
             params = m.groups()
+            # inspect.signature(action).parameters.get('message')
             values = action(message, user, channel, *params)
             return values
 
@@ -46,6 +50,7 @@ def handle_event(event, bot_ouath, slack_url):
         return 
     message, channel, user = extract_crucial(json_event)
     response = {"m": message, "C": channel, "u": user}
+    print("ROOOOOOOYUTING")
     reply_message = route(message, user, channel)
     reply("siemanko bot: {}".format(reply_message), channel, bot_ouath, slack_url)
 
@@ -68,7 +73,7 @@ def extract_crucial(json_event):
 def reply(message, channel, bot_ouath, slack_url):
     data = urllib.parse.urlencode(
         (
-            ("token", BOT_OAUTH),
+            ("token", bot_ouath),
             ("channel", channel),
             ("text", message)
         )
