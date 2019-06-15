@@ -1,10 +1,14 @@
-import inspect
 import re
+import logging
 import urllib.parse
 import urllib.request
 import json
 
 REGISTRY = []
+
+log = logging.getLogger()
+# log.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
+log.setLevel(logging.DEBUG)
 
 # avoid OOP at all costs
 def match(regex):
@@ -51,12 +55,16 @@ STATUS_BAD = 504
 
 def handle_event(event, bot_ouath, slack_url):
     json_event = load_event(event)
+    log.debug(f"JSON EVENT received: {json_event}")
     if is_bot_message(json_event):
-        return 
+        log.info('Ignoring messege from other bots.')
+        return
+    log.info("message received, nonbot") 
     message, channel, user = extract_crucial(json_event)
     response = {"m": message, "C": channel, "u": user}
     reply_message = route(message, user, channel)
-    reply("siemanko bot: {}".format(reply_message), channel, bot_ouath, slack_url)
+    if reply_message:
+        reply("siemanko bot: {}".format(reply_message), channel, bot_ouath, slack_url)
     return respond(STATUS_OK, {"x": "x"})
 
 def load_event(event):

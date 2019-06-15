@@ -1,0 +1,22 @@
+service: chatbot-serverless
+
+frameworkVersion: ">=1.2.0 <2.0.0"
+
+provider:
+  name: aws
+  runtime: python3.7 # or python3.7, supported as of November 2018
+  memorySize: 128
+
+package:
+  exclude:
+    - ./** 
+  include:
+    - ./*.py 
+
+functions:
+  chatbot:
+    handler: chatbot.handle
+    events:
+      - http:
+          path: chat
+          method: post

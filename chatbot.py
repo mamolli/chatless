@@ -41,7 +41,7 @@ def show_help(bot_event):
 
 
 def handle(event, context):
-    print(json.dumps(event))
+    print("ROUTING YOLO")
     return router.handle_event(event, BOT_OAUTH, SLACK_URL)
 
 

@@ -18,6 +18,19 @@ resource "aws_iam_role" "lambda_exec_role" {
   assume_role_policy = "${file("lambda_policy.json")}"
 }
 
+resource "aws_iam_policy" "lambda_logging" {
+  name = "lambda_logging"
+  path = "/"
+  description = "IAM policy for logging from a lambda"
+
+  policy = "${file("lambda_cloudwatch_policy.json")}" 
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_logs" {
+  role = "${aws_iam_role.lambda_exec_role.name}"
+  policy_arn = "${aws_iam_policy.lambda_logging.arn}"
+}
+
 resource "aws_api_gateway_rest_api" "lambda_chatbot" {
   name        = "lambda_chatbot"
   description = ""
@@ -70,4 +83,19 @@ resource "aws_api_gateway_deployment" "lambda" {
 
   rest_api_id = "${aws_api_gateway_rest_api.lambda_chatbot.id}"
   stage_name  = "test"
+}
+
+resource "aws_lambda_permission" "apigw" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.lambda_function.arn}"
+  principal     = "apigateway.amazonaws.com"
+
+  # The /*/* portion grants access from any method on any resource
+  # within the API Gateway "REST API".
+  source_arn = "${aws_api_gateway_deployment.lambda.execution_arn}/*/*"
+}
+
+output "base_url" {
+  value = "${aws_api_gateway_deployment.lambda.invoke_url}"
 }
