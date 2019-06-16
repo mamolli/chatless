@@ -4,6 +4,8 @@ import urllib.parse
 import urllib.request
 import json
 
+from pprint import pprint 
+
 REGISTRY = []
 
 log = logging.getLogger()
@@ -65,21 +67,23 @@ def handle_event(event, bot_ouath, slack_url):
     reply_message = route(message, user, channel)
     if reply_message:
         reply("siemanko bot: {}".format(reply_message), channel, bot_ouath, slack_url)
-    return respond(STATUS_OK, {"x": "x"})
+    return respond(STATUS_OK, {"x": reply_message})
 
 def load_event(event):
     body = json.loads(event['body'])    
-    return body
+    return json.loads(body.get('body'))
 
 def is_bot_message(json_event):
+    pprint(type(json_event))
     if json_event['event'].get('subtype') == "bot_message":
         return True
+    print("not bot")
     return False
 
 def extract_crucial(json_event):
-    message = json_event['event']['text']
-    channel = json_event['event']['channel']
-    user = json_event['event']['user']
+    message = json_event['event'].get('text')
+    channel = json_event['event'].get('channel')
+    user = json_event['event'].get('user')
     return message, channel, user
 
     
