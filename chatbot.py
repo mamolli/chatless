@@ -1,7 +1,7 @@
 import json
 import router
+import event_handler
 
-STATUS_OK = 200
 
 BOT_OAUTH = 'xoxb-648247024770-666706406096-RzX2wOfHYNFqX0nTMqd3yulN' 
 SLACK_URL = "https://slack.com/api/chat.postMessage"
@@ -15,6 +15,6 @@ def show_help(bot_event):
 
 def handle(event, context):
     # print(event)
-    return event.handle_event(event, BOT_OAUTH, SLACK_URL)
+    return event_handler.handle_event(event, BOT_OAUTH, SLACK_URL)
 
 
