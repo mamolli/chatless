@@ -3,5 +3,4 @@ branch = True
 
 [report]
 show_missing = True
-omit =
-    chatless/tests/*.py
+omit = chatless/tests/*.py
