@@ -15,7 +15,9 @@ package:
 
 functions:
   chatbot:
-    handler: chatless.chatbot_example.handle
+    handler: chatless.chatbot_example_dynamodb.handle
+    environment:
+      SLACKBOT_OAUTH: 'xoxb-648247024770-666706406096-RzX2wOfHYNFqX0nTMqd3yulN'
     events:
       - http:
           path: chat

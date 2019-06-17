@@ -1,8 +1,5 @@
 import re
 import logging
-import json
-
-from pprint import pformat
 
 REGISTRY = []
 DEFAULT_FUNCTION = None
@@ -16,7 +13,7 @@ def default(action):
     def fu(*args, **kwargs):
         return action(*args, **kwargs)
     # hate this so much, however it is easiest apraoch atm
-    global DEFAULT_FUNCTION 
+    global DEFAULT_FUNCTION
     DEFAULT_FUNCTION = fu
     return fu
 
@@ -36,7 +33,7 @@ def route(message, user, channel):
     for regex, action in REGISTRY:
         m = re.search(regex, message) if regex is not None else None
         if m:
-            params = m.groups() 
+            params = m.groups()
             event = create_bot_event(message, user, channel, params)
             values = action(bot_event=event)
     # when no values found

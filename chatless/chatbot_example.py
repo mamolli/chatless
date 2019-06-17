@@ -1,17 +1,16 @@
-import json
+import os
 import chatless
 
-BOT_OAUTH = 'xoxb-648247024770-666706406096-RzX2wOfHYNFqX0nTMqd3yulN' 
-SLACK_URL = "https://slack.com/api/chat.postMessage"
+SLACKBOT_OAUTH = os.environ.get('SLACKBOT_OAUTH')
+SLACK_URL = os.environ.get('SLACK_URL') or "https://slack.com/api/chat.postMessage"
 
 
+@chatless.default
 @chatless.match(r"/hi|hello|man|help|docs/")
 def show_help(bot_event):
-    print("showing help")
     return "siemano dziwko"
 
 
 def handle(event, context):
-    return chatless.handle(event, BOT_OAUTH, SLACK_URL)
-
-
+    assert SLACKBOT_OAUTH
+    return chatless.handle(event, SLACKBOT_OAUTH, SLACK_URL)
