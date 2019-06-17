@@ -6,6 +6,18 @@ provider:
   name: aws
   runtime: python3.6 # or python3.7, supported as of November 2018
   memorySize: 128
+  environment:
+    DYNAMODB_TABLE: Luncherbot 
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
 
 package:
   exclude:
@@ -13,12 +25,36 @@ package:
   include:
     - ./chatless/**
 
+resources:
+  Resources:
+    LuncherbotDynamoDbTable: 
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Delete
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: date
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+          - AttributeName: date
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+
 functions:
   chatbot:
     handler: chatless.chatbot_example_dynamodb.handle
     environment:
       SLACKBOT_OAUTH: 'xoxb-648247024770-666706406096-RzX2wOfHYNFqX0nTMqd3yulN'
+      PROVIDER_REGION: "${self:provider.region}"
+      DYNAMODB_TABLE: "${self:provider.environment.DYNAMODB_TABLE}"
     events:
       - http:
           path: chat
           method: post
+
