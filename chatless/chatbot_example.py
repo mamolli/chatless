@@ -8,7 +8,7 @@ SLACK_URL = os.environ.get('SLACK_URL') or "https://slack.com/api/chat.postMessa
 @chatless.default
 @chatless.match(r"/hi|hello|man|help|docs/")
 def show_help(bot_event):
-    return "siemano dziwko"
+    return "siemano"
 
 
 def handle(event, context):
