@@ -34,12 +34,12 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
-          - AttributeName: ballot_date
+          - AttributeName: sortkey
             AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
-          - AttributeName: ballot_date
+          - AttributeName: sortkey
             KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1

@@ -3,6 +3,7 @@ import logging
 import urllib.parse
 import urllib.request
 from pprint import pformat
+from threading import Thread
 
 from chatless import router
 
@@ -13,21 +14,7 @@ log = logging.getLogger()
 # log.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
 log.setLevel(logging.DEBUG)
 
-
-# TODO: verify source
-def simple_challenge(json_event):
-    challenge = json_event.get('challenge')
-    if challenge:
-        return challenge
-    return None
-
-def handle_event(event, bot_ouath, slack_url):
-    bot_event = load_body(event)
-
-    challenge_phrase = simple_challenge(bot_event)
-    if challenge_phrase:
-        return respond(STATUS_OK, {"challenge": challenge_phrase})
-
+def handle_thread(bot_event, bot_ouath, slack_url):
     if is_bot_message(bot_event):
         log.info('Ignoring messege from other bots.')
         return
@@ -38,10 +25,27 @@ def handle_event(event, bot_ouath, slack_url):
     reply_message = router.route(message, user, channel)
     if reply_message:
         log.debug("Replying to channel %s, with message: %s", channel, reply_message)
-        reply("siemanko bot: {}".format(reply_message), channel, bot_ouath, slack_url)
+        reply(reply_message, channel, bot_ouath, slack_url)
     else:
         log.debug("No reply for source event: %s", source_event)
-    return respond(STATUS_OK, {"text": reply_message, "channel": channel, "source_event": source_event})
+
+# TODO: verify source
+def simple_challenge(json_event):
+    challenge = json_event.get('challenge')
+    if challenge:
+        return challenge
+    return None
+
+def handle_event(event, bot_ouath, slack_url):
+    bot_event = load_body(event)
+    challenge_phrase = simple_challenge(bot_event)
+    if challenge_phrase:
+        return respond(STATUS_OK, {"challenge": challenge_phrase})
+    # rest of the code in thread
+    # worker = Thread(target=handle_thread, args=[bot_event, bot_ouath, slack_url])
+    # worker.start()
+    handle_thread(bot_event, bot_ouath, slack_url)
+    return respond(STATUS_OK, {})
 
 def load_body(event):
     log.debug("extracting event body: %s", pformat(event))

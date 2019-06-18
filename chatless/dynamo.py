@@ -7,11 +7,13 @@ TABLE_NAME = os.environ.get('DYNAMODB_TABLENAME')
 # spoiler alert, dynamo db is a bag of trash
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(TABLE_NAME or 'Luncherbot')
-PKEY = "ballots"
+PKEY_BALLOTS = 'ballots'
+PKEY = 'id'
+RANGE_KEY = 'sortkey'
 
 #
 # structure of voting:
-# __ = {
+# __ ={ PKEY
 #   "venues": {
 #       "id": None,
 #       "name": None,
@@ -40,7 +42,6 @@ def _get_venue(ballot, venue):
 def add_vote(venue, user):
     ballot = get_ballot()
     venue = _get_venue(ballot, venue)
-    print(venue)
     ballot['votes'][user] = {"id": venue['id'], 'name': venue['name']}
     update_ballot_key(ballot, 'votes', ballot['votes'])
 
@@ -77,7 +78,7 @@ def remove_venue(venue):
 
 # perhaps we should be updating whole item?
 def update_ballot_key(item, key, value):
-    table.update_item(Key={'id': item['id'], 'ballot_date': item['ballot_date']},
+    table.update_item(Key={PKEY: item[PKEY], RANGE_KEY: item[RANGE_KEY]},
                       UpdateExpression=f'SET {key} = :val',
                       ExpressionAttributeValues={':val': value})
 
@@ -109,9 +110,9 @@ def get_ballot(ballot_date=None):
     if isinstance(ballot_date, str):
         ballot_date = date.fromisoformat(ballot_date)
 
-    q = {'KeyConditionExpression': 'id = :key AND ballot_date = :ballot_date',
+    q = {'KeyConditionExpression': f'{PKEY} = :key AND {RANGE_KEY} = :ballot_date',
          'Limit': 1, 'ScanIndexForward': True,
-         'ExpressionAttributeValues': {':key': PKEY, ':ballot_date': ballot_date.isoformat()}}
+         'ExpressionAttributeValues': {':key': PKEY_BALLOTS, ':ballot_date': ballot_date.isoformat()}}
     ballot_query = table.query(**q)
     if not ballot_query.get('Count', 0):
         generate_ballot()
@@ -120,7 +121,7 @@ def get_ballot(ballot_date=None):
     return ballot_query.get('Items')[0]
 
 def generate_ballot():
-    ballot = table.query(KeyConditionExpression='id = :key',
+    ballot = table.query(KeyConditionExpression=f'{PKEY} = :key',
                          Limit=1, ScanIndexForward=True,
                          ExpressionAttributeValues={':key': PKEY})
 
@@ -128,9 +129,9 @@ def generate_ballot():
         ballot_content = ballot.get('Items')[0]
     else:
         ballot_content = {}
-        ballot_content['id'] = PKEY
+        ballot_content[PKEY] = PKEY_BALLOTS
         ballot_content['venues'] = []
 
     ballot_content['votes'] = {}
-    ballot_content['ballot_date'] = date.today().isoformat()
+    ballot_content[RANGE_KEY] = date.today().isoformat()
     table.put_item(Item=ballot_content)
