@@ -1,10 +1,11 @@
+import os
 import json
 import logging
 import urllib.parse
 import urllib.request
 from pprint import pformat
-from threading import Thread
 
+import boto3
 from chatless import router
 
 STATUS_OK = 200
@@ -14,7 +15,7 @@ log = logging.getLogger()
 # log.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
 log.setLevel(logging.DEBUG)
 
-def handle_thread(bot_event, bot_ouath, slack_url):
+def handle_message(bot_event, bot_ouath, slack_url):
     if is_bot_message(bot_event):
         log.info('Ignoring messege from other bots.')
         return
@@ -37,22 +38,33 @@ def simple_challenge(json_event):
     return None
 
 def handle_event(event, bot_ouath, slack_url):
-    bot_event = load_body(event)
+    # make better checks for q events
+    if event.get('Records'):
+        # process request
+        unwrap_q_msg = event.get('Records')[0]
+        bot_event = load_body(load_body(unwrap_q_msg))
+        handle_message(bot_event, bot_ouath, slack_url)
+    else:
+        bot_event = load_body(event)
+        sqs = boto3.client('sqs')
+        q_url = os.environ.get('SQS_QUEUE')
+        # TODO:unhardcode
+        json_event = json.dumps(event)
+        sqs.send_message(QueueUrl=q_url, MessageBody=json_event)
+
     challenge_phrase = simple_challenge(bot_event)
     if challenge_phrase:
         return respond(STATUS_OK, {"challenge": challenge_phrase})
-    # rest of the code in thread
-    # worker = Thread(target=handle_thread, args=[bot_event, bot_ouath, slack_url])
-    # worker.start()
-    handle_thread(bot_event, bot_ouath, slack_url)
     return respond(STATUS_OK, {})
 
 def load_body(event):
-    log.debug("extracting event body: %s", pformat(event))
-    return json.loads(event.get('body'))
+    log.debug("extracting event body:\n %s", pformat(event))
+    body = json.loads(event.get('body'))
+    return body
     # return json.loads(body.get('body'))
 
 def is_bot_message(json_event):
+    log.debug("verify if botmsg: %s", pformat(json_event))
     if json_event['event'].get('subtype') == "bot_message":
         return True
     return False

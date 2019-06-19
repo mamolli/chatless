@@ -2,6 +2,9 @@ service: chatbot-serverless
 
 frameworkVersion: ">=1.2.0 <2.0.0"
 
+custom:
+  sqs: ${opt:region, self:provider.region}-queue 
+
 provider:
   name: aws
   runtime: python3.6 # or python3.7, supported as of November 2018
@@ -9,6 +12,13 @@ provider:
   environment:
     DYNAMODB_TABLE: Luncherbot 
   iamRoleStatements:
+    - Effect: Allow
+      Action:
+      - sqs:DeleteMessage
+      - sqs:ReceiveMessage
+      - sqs:SendMessage
+      - sqs:SendMessageBatch
+      Resource: "arn:aws:sqs:*:*:${self:custom.sqs}"
     - Effect: Allow
       Action:
         - dynamodb:Query
@@ -27,6 +37,12 @@ package:
 
 resources:
   Resources:
+    Messages:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.sqs}
+        MessageRetentionPeriod: 12000
+        VisibilityTimeout: 60
     LuncherbotDynamoDbTable: 
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Delete
@@ -53,8 +69,15 @@ functions:
       SLACKBOT_OAUTH: 'xoxb-648247024770-666706406096-RzX2wOfHYNFqX0nTMqd3yulN'
       PROVIDER_REGION: "${self:provider.region}"
       DYNAMODB_TABLE: "${self:provider.environment.DYNAMODB_TABLE}"
+      SQS_QUEUE:
+        Ref: Messages
     events:
       - http:
           path: chat
           method: post
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - Messages
+              - Arn
 

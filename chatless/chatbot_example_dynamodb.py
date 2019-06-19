@@ -15,17 +15,26 @@ def show_help(bot_event):
     help_string = """\
 Aye mate, This is a simple lunch proposal/voting chat bot, written using chatless.
 Here is a rundown of what I can do (simply write to me privately, or @mention me on the channel):
-    `*add venue McDonaldos*` -> adds a new option for voting
-    `*remove venue McDonaldos*` -> removes a new option for voting
-    `*list venue*` -> shows all venues
-    `*vote #2*` or `*vote McDonaldos*` -> cast vote for today's lunch
+    `add venue McDonaldos` -> adds a new option for voting
+    `remove venue McDonaldos` -> removes a new option for voting
+    `list venue` -> shows all venues
+    `vote #2` or `vote McDonaldos` -> cast vote for today's lunch
     `*show vote*` -> show current votes
 """
     return help_string
 
-@chatless.match(r"add venue\s*(\S+)")
+@chatless.match(r"add\s*venue\s*(\S+)")
 def add_venue(bot_event):
     dynamo.add_venue(bot_event['params'][0], bot_event['user'])
+    ballot = dynamo.get_ballot()
+    venues = (f"#{v['id']} {v['name']}" for v in ballot['venues'])
+    venues_str = ', '.join(venues)
+    out = f"Venue added, here is the update list of all vevnues: {venues_str}"
+    return out
+
+@chatless.match(r"vote\s*(\S+)")
+def add_vote(bot_event):
+    dynamo.add_vote(bot_event['params'][0], bot_event['user'])
     ballot = dynamo.get_ballot()
     return ballot
 
