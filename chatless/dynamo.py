@@ -35,7 +35,8 @@ def _get_venue(ballot, venue):
     venue = venue.strip().lower()
     for v_dict in ballot['venues']:
         vid = v_dict['id']
-        if venue in (str(vid), v_dict['name'].strip().lower(), f'#{vid}'):
+        vname = v_dict['name'].strip().lower()
+        if venue in (str(vid), vname, f'${vid} {vname}', f'${vid}'):
             return v_dict
     return
 
@@ -66,11 +67,12 @@ def remove_venue(venue):
     votes = ballot['votes']
     # not the most elegant
     for v in venues:
-        v_name = v.get('name').strip().lower()
-        if v_name == venue_lower:
+        vname = v.get('name').strip().lower()
+        vid = v.get('id')
+        if venue_lower in (str(vid), vname, f'${vid} {vname}', f'${vid}'):
             venues.remove(v)
-            for user, vote in votes.keys:
-                if f"#{venue_lower}" == vote['name'] or venue_lower == vote['name']:
+            for user, vote in votes.items():
+                if f"${venue_lower}" == vote['id'] or venue_lower == vote['name']:
                     ballot['votes'].pop(user)
             update_ballot_key(ballot, 'venues', venues)
             return True
