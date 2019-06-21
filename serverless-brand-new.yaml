@@ -1,16 +1,18 @@
-service: chatbot-serverless
+service: lunchero-serverless
 
 frameworkVersion: ">=1.2.0 <2.0.0"
 
 custom:
-  sqs: ${opt:region, self:provider.region}-queue 
-
+  app_name: Lunchero
+  dynamo_name: ${self:custom.app_name}-dynamo
+  sqs_name: ${self:custom.app_name}-sqs
+ 
 provider:
   name: aws
   runtime: python3.6 # or python3.7, supported as of November 2018
   memorySize: 128
   environment:
-    DYNAMODB_TABLE: Luncherbot 
+    DYNAMODB_TABLE: ${self:custom.dynamo_name} 
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -18,7 +20,7 @@ provider:
       - sqs:ReceiveMessage
       - sqs:SendMessage
       - sqs:SendMessageBatch
-      Resource: "arn:aws:sqs:*:*:${self:custom.sqs}"
+      Resource: "arn:aws:sqs:*:*:${self:custom.sqs_name}"
     - Effect: Allow
       Action:
         - dynamodb:Query
@@ -37,10 +39,10 @@ package:
 
 resources:
   Resources:
-    Messages:
+    BufferQueue:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: ${self:custom.sqs}
+        QueueName: ${self:custom.sqs_name}
         MessageRetentionPeriod: 12000
         VisibilityTimeout: 60
     LuncherbotDynamoDbTable: 
@@ -70,7 +72,7 @@ functions:
       PROVIDER_REGION: "${self:provider.region}"
       DYNAMODB_TABLE: "${self:provider.environment.DYNAMODB_TABLE}"
       SQS_QUEUE:
-        Ref: Messages
+        Ref: BufferQueue
     events:
       - http:
           path: chat
@@ -78,6 +80,6 @@ functions:
       - sqs:
           arn:
             Fn::GetAtt:
-              - Messages
+              - BufferQueue
               - Arn
 

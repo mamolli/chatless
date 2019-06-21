@@ -1,10 +1,14 @@
 import os
 from datetime import date
+import logging
 import boto3
 
-TABLE_NAME = os.environ.get('DYNAMODB_TABLENAME')
+log = logging.getLogger()
+# log.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
+log.setLevel(logging.DEBUG)
 
 # spoiler alert, dynamo db is a bag of trash
+TABLE_NAME = os.environ.get('DYNAMODB_TABLENAME')
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(TABLE_NAME or 'Luncherbot')
 PKEY_BALLOTS = 'ballots'
@@ -93,19 +97,6 @@ def get_free_id(ids):
             return n
     raise StopIteration
 
-# i am an idiot
-# there is a chance i am an idiot, but boto3 cant translate types
-# it really seems like garbage, that a high-level library lacks much
-# def dict_to_item(raw):
-#     if isinstance(raw, dict):
-#         return {'M': {k: dict_to_item(v) for k, v in raw.items()}}
-#     elif isinstance(raw, list):
-#         return {'L': [dict_to_item(v) for v in raw]}
-#     elif isinstance(raw, str):
-#         return {'S': raw}
-#     elif isinstance(raw, int):
-#         return {'N': str(raw)}
-
 def get_ballot(ballot_date=None):
     if ballot_date is None:
         ballot_date = date.today()
@@ -125,8 +116,8 @@ def get_ballot(ballot_date=None):
 def generate_ballot():
     ballot = table.query(KeyConditionExpression=f'{PKEY} = :key',
                          Limit=1, ScanIndexForward=True,
-                         ExpressionAttributeValues={':key': PKEY})
-
+                         ExpressionAttributeValues={':key': PKEY_BALLOTS})
+    log.debug("Generating ballot from: %s", ballot)
     if ballot.get('Count'):
         ballot_content = ballot.get('Items')[0]
     else:
@@ -136,4 +127,5 @@ def generate_ballot():
 
     ballot_content['votes'] = {}
     ballot_content[RANGE_KEY] = date.today().isoformat()
+    log.debug("Generating new ballot: %s", ballot)
     table.put_item(Item=ballot_content)

@@ -1,13 +1,17 @@
 import os
 from datetime import date
 import boto3
+import logging
 # from boto3.dynamodb.conditions import Key, Attr
 import chatless
 from chatless import dynamo
 
+log = logging.getLogger()
+# log.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
+log.setLevel(logging.DEBUG)
+
 SLACKBOT_OAUTH = os.environ.get('SLACKBOT_OAUTH')
 SLACK_URL = os.environ.get('SLACK_URL') or "https://slack.com/api/chat.postMessage"
-
 
 @chatless.default
 @chatless.match(r"/hi|hello|man|help|docs/")
@@ -26,7 +30,7 @@ Here is a rundown of what I can do (simply write *direct message or @mention me*
 @chatless.match(r"show\s*venues?\s*")
 def show_venue(bot_event):
     ballot = dynamo.get_ballot()
-    venues = (f"#{v['id']} {v['name']}" for v in ballot['venues'])
+    venues = (f"_${v['id']}_ *{v['name']}*" for v in ballot['venues'])
     venues_str = '\n\t'.join(venues)
     out = f"Here is the list of all vevnues:\n\t{venues_str}"
     return out
@@ -35,7 +39,7 @@ def show_venue(bot_event):
 def add_venue(bot_event):
     dynamo.add_venue(bot_event['params'][0], bot_event['user'])
     ballot = dynamo.get_ballot()
-    venues = (f"${v['id']} {v['name']}" for v in ballot['venues'])
+    venues = (f"_${v['id']}_ *{v['name']}*" for v in ballot['venues'])
     venues_str = '\n\t'.join(venues)
     out = f"Venue added, here is the updated list of all vevnues:\n\t{venues_str}"
     return out
@@ -44,7 +48,7 @@ def add_venue(bot_event):
 def remove_venue(bot_event):
     dynamo.remove_venue(bot_event['params'][0])
     ballot = dynamo.get_ballot()
-    venues = (f"${v['id']} {v['name']}" for v in ballot['venues'])
+    venues = (f"_${v['id']}_ *{v['name']}*" for v in ballot['venues'])
     venues_str = '\n\t'.join(venues)
     out = f"Venue added, here is the updated list of all vevnues:\n\t{venues_str}"
     return out
@@ -77,7 +81,14 @@ def show_vote(bot_event):
         if not votes_count[v['name']].get('users'):
             votes_count[v['name']]['users'] = set()
         votes_count[v['name']]['users'].add(u)
-    votes = (f"*{k}* : *{v['count']} votes*" for k, v in votes_count.items())
+
+    votes = []
+    for k, v in votes_count.items():
+        users = (f"<@{u}>"for u in v['users'])
+        users = ", ".join(users)
+        vote_str = f"*{k}* : *{v['count']} votes by: {users}*"
+        votes.append(vote_str)
+    # votes = (f"*{k}* : *{v['count']} votes by: {users}*" for k, v in votes_count.items())
     votes_str = "\n\t".join(votes)
     out = f"voting results currently look like this: \n\t {votes_str}"
     return out
