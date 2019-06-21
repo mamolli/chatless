@@ -103,17 +103,6 @@ def get_ballot(ballot_date=None):
     if isinstance(ballot_date, str):
         ballot_date = date.fromisoformat(ballot_date)
 
-    q = {'KeyConditionExpression': f'{PKEY} = :key AND {RANGE_KEY} = :ballot_date',
-         'Limit': 1, 'ScanIndexForward': True,
-         'ExpressionAttributeValues': {':key': PKEY_BALLOTS, ':ballot_date': ballot_date.isoformat()}}
-    ballot_query = table.query(**q)
-    if not ballot_query.get('Count', 0):
-        generate_ballot()
-        ballot_query = table.query(**q)
-        assert ballot_query.get('Count', 0)
-    return ballot_query.get('Items')[0]
-
-def generate_ballot():
     ballot = table.query(KeyConditionExpression=f'{PKEY} = :key',
                          Limit=1, ScanIndexForward=True,
                          ExpressionAttributeValues={':key': PKEY_BALLOTS})
@@ -129,3 +118,4 @@ def generate_ballot():
     ballot_content[RANGE_KEY] = date.today().isoformat()
     log.debug("Generating new ballot: %s", ballot)
     table.put_item(Item=ballot_content)
+    return ballot_content
