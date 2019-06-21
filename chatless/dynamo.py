@@ -7,13 +7,12 @@ log = logging.getLogger()
 # log.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
 log.setLevel(logging.DEBUG)
 
-# spoiler alert, dynamo db is a bag of trash
-TABLE_NAME = os.environ.get('DYNAMODB_TABLENAME')
-dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table(TABLE_NAME or 'Luncherbot')
+TABLE_NAME = os.environ.get('DYNAMODB_TABLE')
 PKEY_BALLOTS = 'ballots'
 PKEY = 'id'
 RANGE_KEY = 'sortkey'
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table(TABLE_NAME)
 
 #
 # structure of voting:
@@ -84,6 +83,7 @@ def remove_venue(venue):
 
 # perhaps we should be updating whole item?
 def update_ballot_key(item, key, value):
+    log.debug("Updating ballot %s with {%s: %s}", item, key, value)
     table.update_item(Key={PKEY: item[PKEY], RANGE_KEY: item[RANGE_KEY]},
                       UpdateExpression=f'SET {key} = :val',
                       ExpressionAttributeValues={':val': value})
