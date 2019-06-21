@@ -17,7 +17,7 @@ table = dynamodb.Table(TABLE_NAME)
 #
 # structure of voting:
 # __ ={ PKEY
-#   "venues": {
+#   "places": {
 #       "id": None,
 #       "name": None,
 #       "added_by": None
@@ -29,64 +29,67 @@ table = dynamodb.Table(TABLE_NAME)
 #
 # }
 
-def get_venues():
+def get_places():
     ballot = get_ballot()
-    venues = ballot.get('venues', {})
-    return venues
+    places = ballot.get('places', {})
+    return places
 
-def _get_venue(ballot, venue):
-    venue = venue.strip().lower()
-    for v_dict in ballot['venues']:
+def _get_place(ballot, place):
+    place = place.strip().lower()
+    for v_dict in ballot['places']:
         vid = v_dict['id']
         vname = v_dict['name'].strip().lower()
-        if venue in (str(vid), vname, f'${vid} {vname}', f'${vid}'):
+        if place in (str(vid), vname, f'${vid} {vname}', f'${vid}'):
             return v_dict
     return
 
-def add_vote(venue, user):
+def add_vote(place, user):
     ballot = get_ballot()
-    venue = _get_venue(ballot, venue)
-    ballot['votes'][user] = {"id": venue['id'], 'name': venue['name']}
-    update_ballot_key(ballot, 'votes', ballot['votes'])
+    place = _get_place(ballot, place)
+    ballot['votes'][user] = {"id": place['id'], 'name': place['name']}
+    log.debug("Adding vote for %s by %s", place, user)
+    return update_ballot_key(ballot, 'votes', ballot['votes'])
 
-def add_venue(venue, user):
+def add_place(place, user):
     ballot = get_ballot()
-    venue_lower = venue.strip().lower()
-    venues = ballot['venues']
-    for v in venues:
+    place_lower = place.strip().lower()
+    places = ballot['places']
+    for v in places:
         v_name = v.get('name').strip().lower()
-        if v_name == venue_lower:
+        if v_name == place_lower:
             return False
-    n_id = get_free_id([int(i['id']) for i in venues])
-    venues.append({'id': n_id, 'name': venue, 'user': user})
-    update_ballot_key(ballot, 'venues', venues)
+    n_id = get_free_id([int(i['id']) for i in places])
+    places.append({'id': n_id, 'name': place, 'user': user})
+    update_ballot_key(ballot, 'places', places)
     return True
 
 # if the value gets removed on the same day, it will not persist
-def remove_venue(venue):
+def remove_place(place):
     ballot = get_ballot()
-    venue_lower = venue.strip().lower()
-    venues = ballot['venues']
+    place_lower = place.strip().lower()
+    places = ballot['places']
     votes = ballot['votes']
     # not the most elegant
-    for v in venues:
+    for v in places:
         vname = v.get('name').strip().lower()
         vid = v.get('id')
-        if venue_lower in (str(vid), vname, f'${vid} {vname}', f'${vid}'):
-            venues.remove(v)
+        if place_lower in (str(vid), vname, f'${vid} {vname}', f'${vid}'):
+            places.remove(v)
             for user, vote in votes.items():
-                if f"${venue_lower}" == vote['id'] or venue_lower == vote['name']:
+                if f"${place_lower}" == vote['id'] or place_lower == vote['name']:
                     ballot['votes'].pop(user)
-            update_ballot_key(ballot, 'venues', venues)
+            update_ballot_key(ballot, 'places', places)
             return True
     return False
 
 # perhaps we should be updating whole item?
 def update_ballot_key(item, key, value):
     log.debug("Updating ballot %s with {%s: %s}", item, key, value)
-    table.update_item(Key={PKEY: item[PKEY], RANGE_KEY: item[RANGE_KEY]},
-                      UpdateExpression=f'SET {key} = :val',
-                      ExpressionAttributeValues={':val': value})
+    return table.update_item(Key={PKEY: item[PKEY], RANGE_KEY: item[RANGE_KEY]},
+                             UpdateExpression=f'SET #key = :val',
+                             ExpressionAttributeNames={'#key': key},
+                             ExpressionAttributeValues={':val': value},
+                             ReturnValues="ALL_NEW")
 
 def get_free_id(ids):
     ids = sorted(ids)
@@ -112,10 +115,12 @@ def get_ballot(ballot_date=None):
     else:
         ballot_content = {}
         ballot_content[PKEY] = PKEY_BALLOTS
-        ballot_content['venues'] = []
+        ballot_content['places'] = []
 
-    ballot_content['votes'] = {}
-    ballot_content[RANGE_KEY] = date.today().isoformat()
+    if ballot_date.isoformat() != ballot_content.get(RANGE_KEY):
+        ballot_content['votes'] = {}
+        ballot_content[RANGE_KEY] = date.today().isoformat()
+
     log.debug("Generating new ballot: %s", ballot)
     table.put_item(Item=ballot_content)
     return ballot_content

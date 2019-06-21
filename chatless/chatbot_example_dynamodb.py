@@ -19,38 +19,38 @@ def show_help(bot_event):
     help_string = """\
 Aye mate, This is a simple lunch proposal/voting chat bot, written using chatless.
 Here is a rundown of what I can do (simply write *direct message or @mention me* on the channel):
-    *`add venue McDonaldos`* -> adds a new option for voting
-    *`remove venue McDonaldos`* -> removes a new option for voting
-    *`show venue`* -> shows all venues
+    *`add place McDonaldos`* -> adds a new option for voting
+    *`remove place McDonaldos`* -> removes a new option for voting
+    *`show place`* -> shows all places
     *`vote $2`* or *`vote McDonaldos`* -> cast vote for today's lunch
     *`show vote`* -> show current votes
 """
     return help_string
 
-@chatless.match(r"show\s*venues?\s*")
-def show_venue(bot_event):
+@chatless.match(r"show\s*places?\s*")
+def show_place(bot_event):
     ballot = dynamo.get_ballot()
-    venues = (f"_${v['id']}_ *{v['name']}*" for v in ballot['venues'])
-    venues_str = '\n\t'.join(venues)
-    out = f"Here is the list of all vevnues:\n\t{venues_str}"
+    places = (f"_${v['id']}_ *{v['name']}*" for v in ballot['places'])
+    places_str = '\n\t'.join(places)
+    out = f"Here is the list of all vevnues:\n\t{places_str}"
     return out
 
-@chatless.match(r"add\s*venue\s*(\S+)")
-def add_venue(bot_event):
-    dynamo.add_venue(bot_event['params'][0], bot_event['user'])
+@chatless.match(r"add\s*place\s*(\S+)")
+def add_place(bot_event):
+    dynamo.add_place(bot_event['params'][0], bot_event['user'])
     ballot = dynamo.get_ballot()
-    venues = (f"_${v['id']}_ *{v['name']}*" for v in ballot['venues'])
-    venues_str = '\n\t'.join(venues)
-    out = f"Venue added, here is the updated list of all vevnues:\n\t{venues_str}"
+    places = (f"_${v['id']}_ *{v['name']}*" for v in ballot['places'])
+    places_str = '\n\t'.join(places)
+    out = f"place added, here is the updated list of all vevnues:\n\t{places_str}"
     return out
 
-@chatless.match(r"remove\s*venue\s*(\S+)")
-def remove_venue(bot_event):
-    dynamo.remove_venue(bot_event['params'][0])
+@chatless.match(r"remove\s*place\s*(\S+)")
+def remove_place(bot_event):
+    dynamo.remove_place(bot_event['params'][0])
     ballot = dynamo.get_ballot()
-    venues = (f"_${v['id']}_ *{v['name']}*" for v in ballot['venues'])
-    venues_str = '\n\t'.join(venues)
-    out = f"Venue added, here is the updated list of all vevnues:\n\t{venues_str}"
+    places = (f"_${v['id']}_ *{v['name']}*" for v in ballot['places'])
+    places_str = '\n\t'.join(places)
+    out = f"place added, here is the updated list of all vevnues:\n\t{places_str}"
     return out
 
 @chatless.match(r"vote\s*(\S+)")
@@ -58,14 +58,16 @@ def add_vote(bot_event):
     dynamo.add_vote(bot_event['params'][0], bot_event['user'])
     ballot = dynamo.get_ballot()
     votes_count = {}
-    for u, v in ballot['votes'].items():
+    log.debug("Ballot state %s", ballot)
+    # transpose vote dict
+    for u, p in ballot['votes'].items():
         print(v['name'])
-        votes_count[v['name']] = votes_count.get(v['name'], {})
-        votes_count[v['name']]['count'] = votes_count[v['name']].get('count', 0) + 1
-        if not votes_count[v['name']].get('users'):
-            votes_count[v['name']]['users'] = set()
-        votes_count[v['name']]['users'].add(u)
-    votes = (f"*{k}* : *{v['count']} votes*" for k, v in votes_count.items())
+        votes_count[p['name']] = votes_count.get(p['name'], {})
+        votes_count[p['name']]['count'] = votes_count[p['name']].get('count', 0) + 1
+        if not votes_count[p['name']].get('users'):
+            votes_count[p['name']]['users'] = set()
+        votes_count[p['name']]['users'].add(u)
+    votes = (f"*{k}* : *{p['count']} votes*" for k, p in votes_count.items())
     votes_str = "\n\t".join(votes)
     out = f"Vote added, voting results currently look like this: \n\t {votes_str}"
     return out
@@ -74,13 +76,13 @@ def add_vote(bot_event):
 def show_vote(bot_event):
     ballot = dynamo.get_ballot()
     votes_count = {}
-    for u, v in ballot['votes'].items():
-        print(v['name'])
-        votes_count[v['name']] = votes_count.get(v['name'], {})
-        votes_count[v['name']]['count'] = votes_count[v['name']].get('count', 0) + 1
-        if not votes_count[v['name']].get('users'):
-            votes_count[v['name']]['users'] = set()
-        votes_count[v['name']]['users'].add(u)
+    for u, p in ballot['votes'].items():
+        print(p['name'])
+        votes_count[p['name']] = votes_count.get(p['name'], {})
+        votes_count[p['name']]['count'] = votes_count[p['name']].get('count', 0) + 1
+        if not votes_count[p['name']].get('users'):
+            votes_count[p['name']]['users'] = set()
+        votes_count[p['name']]['users'].add(u)
 
     votes = []
     for k, v in votes_count.items():
