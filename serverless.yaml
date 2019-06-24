@@ -75,6 +75,11 @@ functions:
       - http:
           path: chat
           method: post
+      # Figure out how to pass jsons, any way it seems very backwards
+      # - schedule:
+      #     rate: rate(4 minutes)
+      #     enabled: true
+      #     input: "{ \"body\": \"{\"event\": {\"channel\": \"DKHFFP7HP\", \"text\": \"show place\"}}\" }"
       - sqs:
           arn:
             Fn::GetAtt:

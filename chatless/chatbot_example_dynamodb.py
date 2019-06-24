@@ -95,4 +95,5 @@ def show_vote(bot_event):
 
 def handle(event, context):
     assert SLACKBOT_OAUTH
+    log.info("EVENT receive: %s \n CONTEXT: %s", event, context)
     return chatless.handle(event, SLACKBOT_OAUTH, SLACK_URL)

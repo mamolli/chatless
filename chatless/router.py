@@ -31,6 +31,7 @@ def match(regex):
 def route(message, user, channel):
     values = None
     for regex, action in REGISTRY:
+        log.debug("Pattern-matching message %s with regexp %s", message, regex)
         m = re.search(regex, message) if regex is not None else None
         if m:
             params = m.groups()
