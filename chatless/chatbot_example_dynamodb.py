@@ -61,7 +61,6 @@ def add_vote(bot_event):
     log.debug("Ballot state %s", ballot)
     # transpose vote dict
     for u, p in ballot['votes'].items():
-        print(v['name'])
         votes_count[p['name']] = votes_count.get(p['name'], {})
         votes_count[p['name']]['count'] = votes_count[p['name']].get('count', 0) + 1
         if not votes_count[p['name']].get('users'):
@@ -77,13 +76,12 @@ def show_vote(bot_event):
     ballot = dynamo.get_ballot()
     votes_count = {}
     for u, p in ballot['votes'].items():
-        print(p['name'])
         votes_count[p['name']] = votes_count.get(p['name'], {})
         votes_count[p['name']]['count'] = votes_count[p['name']].get('count', 0) + 1
         if not votes_count[p['name']].get('users'):
             votes_count[p['name']]['users'] = set()
         votes_count[p['name']]['users'].add(u)
-
+    log.info("Votes results look like %s", votes_count)
     votes = []
     for k, v in votes_count.items():
         users = (f"<@{u}>"for u in v['users'])

@@ -107,7 +107,7 @@ def get_ballot(ballot_date=None):
         ballot_date = date.fromisoformat(ballot_date)
 
     ballot = table.query(KeyConditionExpression=f'{PKEY} = :key',
-                         Limit=1, ScanIndexForward=True,
+                         Limit=1, ScanIndexForward=False,
                          ExpressionAttributeValues={':key': PKEY_BALLOTS})
     log.debug("Generating ballot from: %s", ballot)
     if ballot.get('Count'):
