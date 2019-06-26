@@ -35,7 +35,7 @@ def show_place(bot_event):
     out = f"Here is the list of all vevnues:\n\t{places_str}"
     return out
 
-@chatless.match(r"add\s*place\s*(\S+)")
+@chatless.match(r"add\s*place\s*(\S+.*)")
 def add_place(bot_event):
     dynamo.add_place(bot_event['params'][0], bot_event['user'])
     ballot = dynamo.get_ballot()
@@ -44,7 +44,7 @@ def add_place(bot_event):
     out = f"place added, here is the updated list of all vevnues:\n\t{places_str}"
     return out
 
-@chatless.match(r"remove\s*place\s*(\S+)")
+@chatless.match(r"remove\s*place\s*(\S+.*)")
 def remove_place(bot_event):
     dynamo.remove_place(bot_event['params'][0])
     ballot = dynamo.get_ballot()
@@ -53,7 +53,7 @@ def remove_place(bot_event):
     out = f"place added, here is the updated list of all vevnues:\n\t{places_str}"
     return out
 
-@chatless.match(r"vote\s*(\S+)")
+@chatless.match(r"vote\s*(\S+.*)")
 def add_vote(bot_event):
     dynamo.add_vote(bot_event['params'][0], bot_event['user'])
     ballot = dynamo.get_ballot()
@@ -88,6 +88,8 @@ def show_vote(bot_event):
         users = ", ".join(users)
         vote_str = f"*{k}* : *{v['count']} votes by: {users}*"
         votes.append(vote_str)
+    if not len(votes_count):
+        votes = "*No votes yet*, try voting like this: *`vote RestaurantName`* or *`vote $1`*"
     # votes = (f"*{k}* : *{v['count']} votes by: {users}*" for k, v in votes_count.items())
     votes_str = "\n\t".join(votes)
     out = f"voting results currently look like this: \n\t {votes_str}"
