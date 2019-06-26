@@ -24,9 +24,13 @@ def match(regex):
         # validate regex
         rx = re.compile(regex)
         exec_pair = (rx, fu)
-        REGISTRY.append(exec_pair)
+        register(exec_pair)
         return fu
     return regex_deco
+
+def register(exec_pair):
+    log.debug("Registering pattern-matching function %s", exec_pair)
+    REGISTRY.append(exec_pair)
 
 def route(message, user, channel):
     values = None

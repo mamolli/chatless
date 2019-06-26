@@ -110,7 +110,8 @@ def get_ballot(ballot_date=None):
                          Limit=1, ScanIndexForward=False,
                          ExpressionAttributeValues={':key': PKEY_BALLOTS})
     log.debug("Generating ballot from: %s", ballot)
-    if ballot.get('Count'):
+    query_empty = True if ballot.get('Count') else False 
+    if not query_empty:
         ballot_content = ballot.get('Items')[0]
     else:
         ballot_content = {}
@@ -122,5 +123,6 @@ def get_ballot(ballot_date=None):
         ballot_content[RANGE_KEY] = date.today().isoformat()
 
     log.debug("Generating new ballot: %s", ballot)
-    table.put_item(Item=ballot_content)
+    if query_empty:
+        table.put_item(Item=ballot_content)
     return ballot_content

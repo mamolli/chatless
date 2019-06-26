@@ -41,7 +41,7 @@ def add_place(bot_event):
     ballot = dynamo.get_ballot()
     places = (f"_${v['id']}_ *{v['name']}*" for v in ballot['places'])
     places_str = '\n\t'.join(places)
-    out = f"place added, here is the updated list of all vevnues:\n\t{places_str}"
+    out = f"Place added, here is the updated list of all vevnues:\n\t{places_str}"
     return out
 
 @chatless.match(r"remove\s*place\s*(\S+.*)")
@@ -50,7 +50,7 @@ def remove_place(bot_event):
     ballot = dynamo.get_ballot()
     places = (f"_${v['id']}_ *{v['name']}*" for v in ballot['places'])
     places_str = '\n\t'.join(places)
-    out = f"place added, here is the updated list of all vevnues:\n\t{places_str}"
+    out = f"Place removed, here is the updated list of all vevnues:\n\t{places_str}"
     return out
 
 @chatless.match(r"vote\s*(\S+.*)")

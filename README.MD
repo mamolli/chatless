@@ -5,3 +5,5 @@ Simply using flask-like decorators for routing, you can write and deploy your ch
 
 Framework leaves persistance layer to the user.
 Simple implementation of chatbot with db is available as an example.
+
+more to come, this is scaffolding
