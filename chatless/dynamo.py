@@ -95,7 +95,7 @@ def get_free_id(ids):
     ids = sorted(ids)
     range_end = int(ids[-1]) + 2 if ids else 1
     for n in range(range_end):
-        # this could be done with o(n) or even less :)
+        # this could be done with o(n) or even less...
         if n not in ids:
             return n
     raise StopIteration
