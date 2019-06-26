@@ -110,7 +110,7 @@ def get_ballot(ballot_date=None):
                          Limit=1, ScanIndexForward=False,
                          ExpressionAttributeValues={':key': PKEY_BALLOTS})
     log.debug("Generating ballot from: %s", ballot)
-    query_empty = True if ballot.get('Count') else False 
+    query_empty = True if ballot.get('Count') else False
     if not query_empty:
         ballot_content = ballot.get('Items')[0]
     else:
