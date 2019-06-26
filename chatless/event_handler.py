@@ -30,7 +30,7 @@ def handle_message(bot_event, bot_ouath, slack_url):
     else:
         log.debug("No reply for source event: %s", source_event)
 
-# TODO: verify source
+# TODO: verify source later
 def simple_challenge(json_event):
     challenge = json_event.get('challenge')
     if challenge:
