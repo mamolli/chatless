@@ -66,7 +66,7 @@ functions:
   chatbot:
     handler: chatless.chatbot_example_dynamodb.handle
     environment:
-      SLACKBOT_OAUTH: 'xoxb-3360794059-669882893493-7MejyIqpXvJLCgGna42MRmAj'
+      SLACKBOT_OAUTH: ${file(./secrets.yaml):SLACKBOT_OAUTH}
       PROVIDER_REGION: "${self:provider.region}"
       DYNAMODB_TABLE: "${self:provider.environment.DYNAMODB_TABLE}"
       SQS_QUEUE:
