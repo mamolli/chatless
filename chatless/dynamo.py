@@ -1,6 +1,8 @@
 import os
 from datetime import date
+from typing import Optional, Tuple, Dict
 import logging
+import functools
 import boto3
 
 log = logging.getLogger()
@@ -100,6 +102,47 @@ def get_free_id(ids):
             return n
     raise StopIteration
 
+def table_apply(untabled_function, table):
+    return functools.partial(untabled_function, table)
+
+def _dict_to_expression(expr_dict: Dict[str, str]) -> Tuple[str, Dict[str, str], Dict[str, str]]:
+    # fold this to big tuple?
+    expressions = (f"#{key_name} = :{val_name}" for key_name, val_name in expr_dict.items())
+    expression = " AND ".join(expressions)
+    attributes = {f":{v}": v for _, v in expr_dict.items()}
+    keys = {f"#{k}": k for k, _ in expr_dict.items()}
+    return expression, keys, attributes
+
+# api returns dicts, without wrappingfr
+def last_items(table, pkey: Tuple[str, str], sortkey: Optional[Tuple[str, str]],
+               reverse: bool = False, limit: int = 1) -> list:
+    pkeys = filter(lambda x: x, (pkey, sortkey))
+    expr_dict = {k: v for k, v in pkeys} # noqa T484
+    key_expression, keys, attributes = _dict_to_expression(expr_dict)
+    # key_expressions = (f"{key_name} = :{key_name}" for key_name, _ in keys if key_name)
+    # key_expression = " AND ".join(key_expressions)
+    # attributes = {f":{v}": v for k, v in keys}
+    elements = table.query(KeyConditionExpression=key_expression,
+                           Limit=limit, ScanIndexForward=reverse,
+                           ExpressionAttributeNames=keys,
+                           ExpressionAttributeValues=attributes)
+    return elements.get('Records', [])
+
+def update_item(table, pkey: Tuple[str, str], sortkey: Tuple[str, str], update_dict: dict) -> dict:
+    log.debug("Updating ballot %s with {%s: %s}",)
+    pkeys = filter(lambda x: x, (pkey, sortkey))
+    expression, keys, attributes = _dict_to_expression(update_dict)
+    print(_dict_to_expression(update_dict))
+    print(list(pkeys))
+    update_expression = f"SET {expression}"
+    update_cmd = table.update_item(Key={key: val for key, val in pkeys},
+                                   UpdateExpression=update_expression,
+                                   ExpressionAttributeNames=keys,
+                                   ExpressionAttributeValues=attributes,
+                                   ReturnValues="ALL_NEW")
+    return update_cmd.get('Attributes', {})
+
+
 def get_ballot(ballot_date=None):
     if ballot_date is None:
         ballot_date = date.today()
@@ -110,7 +153,7 @@ def get_ballot(ballot_date=None):
                          Limit=1, ScanIndexForward=False,
                          ExpressionAttributeValues={':key': PKEY_BALLOTS})
     log.debug("Generating ballot from: %s", ballot)
-    query_empty = True if ballot.get('Count') else False
+    query_empty = False if ballot.get('Count') else True
     if not query_empty:
         ballot_content = ballot.get('Items')[0]
     else:
@@ -121,8 +164,6 @@ def get_ballot(ballot_date=None):
     if ballot_date.isoformat() != ballot_content.get(RANGE_KEY):
         ballot_content['votes'] = {}
         ballot_content[RANGE_KEY] = date.today().isoformat()
-
-    log.debug("Generating new ballot: %s", ballot)
-    if query_empty:
+        log.debug("Generating new ballot: %s from ballot: %s", ballot_content, ballot)
         table.put_item(Item=ballot_content)
     return ballot_content

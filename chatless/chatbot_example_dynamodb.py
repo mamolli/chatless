@@ -88,10 +88,10 @@ def show_vote(bot_event):
         users = ", ".join(users)
         vote_str = f"*{k}* : *{v['count']} votes by: {users}*"
         votes.append(vote_str)
-    if not len(votes_count):
-        votes = "*No votes yet*, try voting like this: *`vote RestaurantName`* or *`vote $1`*"
     # votes = (f"*{k}* : *{v['count']} votes by: {users}*" for k, v in votes_count.items())
     votes_str = "\n\t".join(votes)
+    if not len(votes_count):
+        votes_str = "*No votes yet*, try voting like this: *`vote RestaurantName`* or *`vote $1`*"
     out = f"voting results currently look like this: \n\t {votes_str}"
     return out
 
