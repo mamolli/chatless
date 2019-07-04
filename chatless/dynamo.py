@@ -32,9 +32,9 @@ class DynamoTableControl(object):
     def table(self):
         return self._table
 
-    def last_items(self, pkey: Tuple[str, str], sortkey: Optional[Tuple[str, str]],
+    def last_items(self, pkey: Tuple[str, str], sortkey: Optional[Tuple[str, str]] = None,
                    reverse: bool = False, limit: int = 1) -> list:
-        pkeys = filter(None, (pkey, sortkey)) # f mypy, cant use identity func here
+        pkeys = filter(None, (pkey, sortkey)) # f mypy
         expr_dict = {k: v for k, v in pkeys} # noqa T484
         key_expression, keys, attributes = _dict_to_expression(expr_dict)
         elements = self.table.query(KeyConditionExpression=key_expression,
@@ -59,13 +59,14 @@ class DynamoTableControl(object):
 
     # not the heaviest method
     def put_item(self, item: dict) -> bool:
+        assert item.get('id') and item.get('sortkey')
         response = self.table.put_item(Item=item).get('ResponseMetadata', {})
         success = response.get('HTTPStatusCode') == 200
         return success
 
 class DynamoSubsetTableControl(DynamoTableControl):
     def __init__(self, table, pkey):
-        super()
+        self._table = table
         self._pkey = pkey
 
     @property
@@ -77,10 +78,10 @@ class DynamoSubsetTableControl(DynamoTableControl):
         return self._pkey
 
     def last_items(self, *args, **kwargs) -> list:
-        return super().last_items(pkey=self._pkey, *args, **kwargs)
+        return super().last_items(pkey=self._pkey, *args, **kwargs)  # type: ignore # fuck mypy issue 4335
 
     def update_item(self, *args, **kwargs) -> dict:
-        return super().update_item(pkey=self._pkey, *args, **kwargs)
+        return super().update_item(pkey=self._pkey, *args, **kwargs)  # type: ignore # fuck mypy issue 4335
 
     def put_item(self, item: dict) -> bool:
         key, val = self._pkey
