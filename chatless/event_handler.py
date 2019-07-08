@@ -9,7 +9,9 @@ import boto3
 from chatless import router
 
 STATUS_OK = 200
-STATUS_BAD = 504
+
+ENV_OAUTH = os.environ.get('SLACKBOT_OAUTH')
+ENV_SLACKURL = os.environ.get('SLACK_URL') or "https://slack.com/api/chat.postMessage"
 
 log = logging.getLogger()
 # log.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
@@ -36,7 +38,7 @@ def simple_challenge(json_event):
         return challenge
     return None
 
-def handle_event(event, bot_ouath, slack_url):
+def handle_event(event, bot_ouath=ENV_OAUTH, slack_url=ENV_SLACKURL):
     # make better checks for q events
     sqs = boto3.client('sqs')
     q_url = os.environ.get('SQS_QUEUE')
