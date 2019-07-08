@@ -42,8 +42,12 @@ def handle_event(event, bot_ouath, slack_url):
     sqs = boto3.client('sqs')
     q_url = os.environ.get('SQS_QUEUE')
 
+    challenge_phrase = simple_challenge(bot_event)
+    if challenge_phrase:
+        return respond(STATUS_OK, {"challenge": challenge_phrase})
+
     if event.get('Records'):
-        # process request
+        # process request from queue
         unwrap_q_msg = event.get('Records')[0]
         bot_event = load_body(load_body(unwrap_q_msg))
         sqs.delete_message(QueueUrl=q_url, ReceiptHandle=unwrap_q_msg.get("receiptHandle"))
@@ -54,9 +58,6 @@ def handle_event(event, bot_ouath, slack_url):
         json_event = json.dumps(event)
         sqs.send_message(QueueUrl=q_url, MessageBody=json_event)
 
-    challenge_phrase = simple_challenge(bot_event)
-    if challenge_phrase:
-        return respond(STATUS_OK, {"challenge": challenge_phrase})
     return respond(STATUS_OK, {})
 
 def load_body(event):

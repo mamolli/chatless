@@ -44,18 +44,18 @@ class DynamoTableControl(object):
         return elements.get('Items', [])
 
     # put item should be easier to use if whole item is replaced
-    def update_item(self, pkey: Tuple[str, str], sortkey: Tuple[str, str],
-                    update_dict: dict) -> dict:
-        log.debug("Updating ballot %s with {%s: %s}",)
-        pkeys = filter(lambda x: x, (pkey, sortkey))
-        expression, keys, attributes = _dict_to_expression(update_dict)
-        update_expression = f"SET {expression}"
-        update_cmd = self.table.update_item(Key={key: val for key, val in pkeys},
-                                            UpdateExpression=update_expression,
-                                            ExpressionAttributeNames=keys,
-                                            ExpressionAttributeValues=attributes,
-                                            ReturnValues="ALL_NEW")
-        return update_cmd.get('Attributes', {})
+    # def update_item(self, pkey: Tuple[str, str], sortkey: Tuple[str, str],
+    #                 update_dict: dict) -> dict:
+    #     log.debug("Updating ballot %s with {%s: %s}",)
+    #     pkeys = filter(lambda x: x, (pkey, sortkey))
+    #     expression, keys, attributes = _dict_to_expression(update_dict)
+    #     update_expression = f"SET {expression}"
+    #     update_cmd = self.table.update_item(Key={key: val for key, val in pkeys},
+    #                                         UpdateExpression=update_expression,
+    #                                         ExpressionAttributeNames=keys,
+    #                                         ExpressionAttributeValues=attributes,
+    #                                         ReturnValues="ALL_NEW")
+    #     return update_cmd.get('Attributes', {})
 
     # not the heaviest method
     def put_item(self, item: dict) -> bool:
@@ -78,10 +78,12 @@ class DynamoSubsetTableControl(DynamoTableControl):
         return self._pkey
 
     def last_items(self, *args, **kwargs) -> list:
+        print(**kwargs)
+        print(*args)
         return super().last_items(pkey=self._pkey, *args, **kwargs)  # type: ignore # fuck mypy issue 4335
 
-    def update_item(self, *args, **kwargs) -> dict:
-        return super().update_item(pkey=self._pkey, *args, **kwargs)  # type: ignore # fuck mypy issue 4335
+    # def update_item(self, *args, **kwargs) -> dict:
+    #     return super().update_item(pkey=self._pkey, *args, **kwargs)  # type: ignore # fuck mypy issue 4335
 
     def put_item(self, item: dict) -> bool:
         key, val = self._pkey

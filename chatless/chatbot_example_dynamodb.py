@@ -4,7 +4,7 @@ import boto3
 import logging
 # from boto3.dynamodb.conditions import Key, Attr
 import chatless
-from chatless import dynamo
+from chatless import lunchero_dynamo
 
 log = logging.getLogger()
 # log.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
@@ -29,7 +29,7 @@ Here is a rundown of what I can do (simply write *direct message or @mention me*
 
 @chatless.match(r"show\s*places?\s*")
 def show_place(bot_event):
-    ballot = dynamo.get_ballot()
+    ballot = lunchero_dynamo.get_ballot()
     places = (f"_${v['id']}_ *{v['name']}*" for v in ballot['places'])
     places_str = '\n\t'.join(places)
     out = f"Here is the list of all vevnues:\n\t{places_str}"
@@ -37,8 +37,8 @@ def show_place(bot_event):
 
 @chatless.match(r"add\s*place\s*(\S+.*)")
 def add_place(bot_event):
-    dynamo.add_place(bot_event['params'][0], bot_event['user'])
-    ballot = dynamo.get_ballot()
+    lunchero_dynamo.add_place(bot_event['params'][0], bot_event['user'])
+    ballot = lunchero_dynamo.get_ballot()
     places = (f"_${v['id']}_ *{v['name']}*" for v in ballot['places'])
     places_str = '\n\t'.join(places)
     out = f"Place added, here is the updated list of all vevnues:\n\t{places_str}"
@@ -46,17 +46,17 @@ def add_place(bot_event):
 
 @chatless.match(r"remove\s*place\s*(\S+.*)")
 def remove_place(bot_event):
-    dynamo.remove_place(bot_event['params'][0])
-    ballot = dynamo.get_ballot()
+    lunchero_dynamo.remove_place(bot_event['params'][0])
+    ballot = lunchero_dynamo.get_ballot()
     places = (f"_${v['id']}_ *{v['name']}*" for v in ballot['places'])
     places_str = '\n\t'.join(places)
     out = f"Place removed, here is the updated list of all vevnues:\n\t{places_str}"
     return out
 
-@chatless.match(r"vote\s*(\S+.*)")
+@chatless.match(r"^\s*vote\s*(\S+.*)")
 def add_vote(bot_event):
-    dynamo.add_vote(bot_event['params'][0], bot_event['user'])
-    ballot = dynamo.get_ballot()
+    lunchero_dynamo.add_vote(bot_event['params'][0], bot_event['user'])
+    ballot = lunchero_dynamo.get_ballot()
     votes_count = {}
     log.debug("Ballot state %s", ballot)
     # transpose vote dict
@@ -73,7 +73,7 @@ def add_vote(bot_event):
 
 @chatless.match(r"show\s+votes?\s*")
 def show_vote(bot_event):
-    ballot = dynamo.get_ballot()
+    ballot = lunchero_dynamo.get_ballot()
     votes_count = {}
     for u, p in ballot['votes'].items():
         votes_count[p['name']] = votes_count.get(p['name'], {})
