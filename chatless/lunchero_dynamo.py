@@ -106,7 +106,7 @@ def get_ballot(ballot_date=None):
     if isinstance(ballot_date, str):
         ballot_date = date.fromisoformat(ballot_date)
 
-    ballot_date_iso = ballot_date.isoformat() 
+    ballot_date_iso = ballot_date.isoformat()
     ballot = dballots.last_items()
     ballot_content = next(iter(ballot), {PKEY: BALLOTS, 'places': []})
 

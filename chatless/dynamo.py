@@ -34,8 +34,8 @@ class DynamoTableControl(object):
 
     def last_items(self, pkey: Tuple[str, str], sortkey: Optional[Tuple[str, str]] = None,
                    reverse: bool = False, limit: int = 1) -> list:
-        pkeys = filter(None, (pkey, sortkey)) # f mypy
-        expr_dict = {k: v for k, v in pkeys} # noqa T484
+        pkeys = filter(None, (pkey, sortkey))  # f mypy
+        expr_dict = {k: v for k, v in pkeys}  # noqa T484
         key_expression, keys, attributes = _dict_to_expression(expr_dict)
         elements = self.table.query(KeyConditionExpression=key_expression,
                                     Limit=limit, ScanIndexForward=reverse,
@@ -87,5 +87,5 @@ class DynamoSubsetTableControl(DynamoTableControl):
 
     def put_item(self, item: dict) -> bool:
         key, val = self._pkey
-        assert item.get(key) == val 
+        assert item.get(key) == val
         return super().put_item(item=item)

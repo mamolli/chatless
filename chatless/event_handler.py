@@ -22,13 +22,12 @@ def handle_message(bot_event, bot_ouath, slack_url):
 
     log.info("message received, nonbot")
     message, channel, user = extract_crucial(bot_event)
-    source_event = {"m": message, "C": channel, "u": user}
     reply_message = router.route(message, user, channel)
     if reply_message:
         log.debug("Replying to channel %s, with message: %s", channel, reply_message)
         reply(reply_message, channel, bot_ouath, slack_url)
     else:
-        log.debug("No reply for source event: %s", source_event)
+        log.debug("No reply for source event: %s", bot_event)
 
 # TODO: verify source later
 def simple_challenge(json_event):
@@ -41,23 +40,25 @@ def handle_event(event, bot_ouath, slack_url):
     # make better checks for q events
     sqs = boto3.client('sqs')
     q_url = os.environ.get('SQS_QUEUE')
-
-    challenge_phrase = simple_challenge(bot_event)
-    if challenge_phrase:
-        return respond(STATUS_OK, {"challenge": challenge_phrase})
-
+    # stupidly guessing this means sqs
     if event.get('Records'):
         # process request from queue
         unwrap_q_msg = event.get('Records')[0]
-        bot_event = load_body(load_body(unwrap_q_msg))
+        bot_event = load_body(unwrap_q_msg)
         sqs.delete_message(QueueUrl=q_url, ReceiptHandle=unwrap_q_msg.get("receiptHandle"))
-        handle_message(bot_event, bot_ouath, slack_url)
+        try:
+            handle_message(bot_event, bot_ouath, slack_url)
+        except Exception:
+            pass
     else:
         bot_event = load_body(event)
         # TODO:unhardcode
-        json_event = json.dumps(event)
+        json_event = json.dumps(bot_event)
+        # abort instantly if challenge
+        challenge_phrase = simple_challenge(bot_event)
+        if challenge_phrase:
+            return respond(STATUS_OK, {"challenge": challenge_phrase})
         sqs.send_message(QueueUrl=q_url, MessageBody=json_event)
-
     return respond(STATUS_OK, {})
 
 def load_body(event):
