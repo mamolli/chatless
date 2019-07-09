@@ -31,6 +31,8 @@ table = dynamodb.Table(TABLE_NAME)
 #
 # }
 
+# TODO: append hashmaps for atomic op
+
 dballots = dynamo.DynamoSubsetTableControl(table, (PKEY, BALLOTS))
 
 
@@ -73,7 +75,6 @@ def stem(s):
 def list_comibination(item_id, item_name):
     item_name = stem(item_name)
     return (str(item_id), item_name, f'${item_id} {item_name}', f'${item_id}')
-
 
 # if the value gets removed on the same day, it will not persist
 def remove_place(place):

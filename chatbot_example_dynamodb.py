@@ -57,23 +57,18 @@ def remove_place(bot_event):
 def add_vote(bot_event):
     lunchero_dynamo.add_vote(bot_event['params'][0], bot_event['user'])
     ballot = lunchero_dynamo.get_ballot()
-    votes_count = {}
-    log.debug("Ballot state %s", ballot)
-    # transpose vote dict
-    for u, p in ballot['votes'].items():
-        votes_count[p['name']] = votes_count.get(p['name'], {})
-        votes_count[p['name']]['count'] = votes_count[p['name']].get('count', 0) + 1
-        if not votes_count[p['name']].get('users'):
-            votes_count[p['name']]['users'] = set()
-        votes_count[p['name']]['users'].add(u)
-    votes = (f"*{k}* : *{p['count']} votes*" for k, p in votes_count.items())
-    votes_str = "\n\t".join(votes)
+    votes_str = count_votes(ballot)
     out = f"Vote added, voting results currently look like this: \n\t {votes_str}"
     return out
 
 @chatless.match(r"show\s+votes?\s*")
 def show_vote(bot_event):
     ballot = lunchero_dynamo.get_ballot()
+    votes_str = count_votes(ballot)
+    out = f"Voting results currently look like this: \n\t {votes_str}"
+    return out
+
+def count_votes(ballot):
     votes_count = {}
     for u, p in ballot['votes'].items():
         votes_count[p['name']] = votes_count.get(p['name'], {})
@@ -92,10 +87,8 @@ def show_vote(bot_event):
     votes_str = "\n\t".join(votes)
     if not len(votes_count):
         votes_str = "*No votes yet*, try voting like this: *`vote RestaurantName`* or *`vote $1`*"
-    out = f"voting results currently look like this: \n\t {votes_str}"
-    return out
+    return votes_str
 
 def handle(event, context):
-    assert SLACKBOT_OAUTH
     log.info("EVENT receive: %s \n CONTEXT: %s", event, dir(context))
-    return chatless.handle(event, SLACKBOT_OAUTH, SLACK_URL)
+    return chatless.handle(event)

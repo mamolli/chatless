@@ -34,6 +34,7 @@ package:
     - ./** 
   include:
     - ./chatless/**
+    - ./chatbot_example_dynamodb.py
 
 resources:
   Resources:
@@ -64,7 +65,7 @@ resources:
 
 functions:
   chatbot:
-    handler: chatless.chatbot_example_dynamodb.handle
+    handler: chatbot_example_dynamodb.handle
     environment:
       SLACKBOT_OAUTH: ${file(./secrets.yaml):SLACKBOT_OAUTH}
       PROVIDER_REGION: "${self:provider.region}"
