@@ -44,6 +44,9 @@ class DynamoTableControl(object):
         return elements.get('Items', [])
 
     # put item should be easier to use if whole item is replaced
+    # TODO: redesign update to provide atomicity in operations
+    # perhaps obtaining document should create a class and track modifications
+    # to make them atomic
     # def update_item(self, pkey: Tuple[str, str], sortkey: Tuple[str, str],
     #                 update_dict: dict) -> dict:
     #     log.debug("Updating ballot %s with {%s: %s}",)

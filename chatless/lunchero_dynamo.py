@@ -18,7 +18,7 @@ table = dynamodb.Table(TABLE_NAME)
 
 
 # structure of voting:
-# __ ={ PKEY
+# __ ={ PKEY->tablename
 #   "places": {
 #       "id": None,
 #       "name": None,
@@ -66,15 +66,6 @@ def add_place(place, user):
     places.append({'id': free_id, 'name': place, 'user': user})
     dballots.put_item(ballot)
     return True
-
-def stem(s):
-    diactrit_map = {'ó': 'o', 'ś': 's', 'ź': 'z', 'ż': 'z', 'ł': 'l', 'ą': 'a', 'ę': 'e', 'ń': 'n', 'ć': 'c'}
-    s = ''.join((diactrit_map.get(char, char) for char in s))
-    return s.strip().lower()
-
-def list_comibination(item_id, item_name):
-    item_name = stem(item_name)
-    return (str(item_id), item_name, f'${item_id} {item_name}', f'${item_id}')
 
 # if the value gets removed on the same day, it will not persist
 def remove_place(place):
