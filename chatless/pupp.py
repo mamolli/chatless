@@ -28,9 +28,8 @@ async def get_url(url: str):
         posts_url = urljoin(url, 'posts')
     else:
         posts_url = url
-    browser = await launch()
-    # browser = await launch(executablePath='~/Library/Application Support/pyppeteer/local-chromium/588429/')
-    # browser = await launch(executablePath='~/Library/Application\ Support/pyppeteer/local-chromium/588429/chrome-mac/Chromium.app/Contents/MacOS/Chromium')
+
+    browser = await launch(executablePath="./chrome-mac/Chromium.app/Contents/MacOS/Chromium")
     page = await browser.newPage()
     await page.goto(posts_url)
     content = await page.content()
