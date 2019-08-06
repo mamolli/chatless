@@ -38,17 +38,16 @@ async def get_url(url: str):
     posts_data = parse_data(content, posts_url)
     return (url, posts_data)
 
-def parse_data(html_content, html_url):
+def parse_data(html_content, post_url):
     lhtml = html.fromstring(html_content)
     post_links = lhtml.cssselect('.timestampContent')
     # extracting some information from html
-    posts_data = (extract_post_data(post_link, html_url) for post_link in post_links)
+    posts_data = (extract_post_data(post_link, post_url) for post_link in post_links)
     posts_data = filter_posts(posts_data)
     return posts_data
 
 def run_get_url(url: str):
     return asyncio.get_event_loop().run_until_complete(get_url(url))
-
 
 async def get_data_from_fb(urls: tuple):
     # loop = asyncio.get_event_loop()
@@ -56,31 +55,25 @@ async def get_data_from_fb(urls: tuple):
     data = await asyncio.gather(*tasks)
     return data
 
-def main():
-    # url = "https://www.facebook.com/Pizza-pasta-basta-278942949312857/"
-    # posts_url = urljoin(url, 'posts')
-    # page_html = run_get_url(posts_url)
-    # lhtml = html.fromstring(page_html)
-    # post_links = lhtml.cssselect('.timestampContent')
-    # # extracting some information from html
-    # posts_data = (extract_post_data(post_link, posts_url) for post_link in post_links)
-    # # posts_data = filter_posts(posts_data)
-    # return posts_data
+def get_urls(urls :tuple):
     loop = asyncio.get_event_loop()
     data = loop.run_until_complete(get_data_from_fb(urls))
     return data
 
 def filter_posts(posts_data):
-    posts_data = tuple(filter(lambda post: _is_date_between(post['post_utc_iso'], *_iso_bounds()), posts_data))
-    # do not filter if only one result left, most likely its correct :)
+    # lazy stops :)
+    posts_data = list(posts_data)
+    # dont filter if only 1 left
+    if len(posts_data) > 1: 
+        posts_data = list(filter(lambda post: _is_date_between(post['post_utc_iso'], *_iso_bounds()), posts_data))
     if len(posts_data) > 1:
-        posts_data = filter(lambda post: _is_lunch_post(post), posts_data)
+        posts_data = list(filter(lambda post: _is_lunch_post(post), posts_data))
     return posts_data
 
 def _is_lunch_post(post):
     return any(keyword in stem(post.get('post_text', '')) for keyword in lunch_keywords)
 
-def extract_post_data(post_link, posts_url):
+def extract_post_data(post_link, fb_url):
     post, link = None, None
     for el in post_link.iterancestors():
         if "userContentWrapper" in el.classes:
@@ -89,12 +82,15 @@ def extract_post_data(post_link, posts_url):
             link = el
         if post and link:
             break
+
     post_epoch = post_link.getparent().attrib.get('data-utime')
     post_epoch = time.mktime(time.gmtime(int(post_epoch))) if post_epoch else None
     post_utc_iso = datetime.fromtimestamp(post_epoch).isoformat()
-    post_link_url = urljoin(posts_url, link.attrib['href'])
+    # sadly post_url can be null
+    post_link_url = urljoin(fb_url, link.attrib.get('href')) if link else None
     post_text = post.text_content()
-    return {"post_utc_iso": post_utc_iso, "post_url": post_link_url, "post_text": post_text}
+
+    return {"fb_url": fb_url, "post_utc_iso": post_utc_iso, "post_url": post_link_url, "post_text": post_text}
 
 def _iso_bounds():
     now = datetime.now()
