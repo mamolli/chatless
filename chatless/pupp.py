@@ -29,7 +29,8 @@ async def get_url(url: str):
     else:
         posts_url = url
 
-    browser = await launch(executablePath="./chrome-mac/Chromium.app/Contents/MacOS/Chromium")
+    # browser = await launch(executablePath="./chrome-mac/Chromium.app/Contents/MacOS/Chromium")
+    browser = await launch(executablePath="./chromium-77.0.3844.0")
     page = await browser.newPage()
     await page.goto(posts_url)
     content = await page.content()

@@ -4,6 +4,7 @@ import boto3
 import logging
 # from boto3.dynamodb.conditions import Key, Attr
 import chatless
+from chatless import pupp
 from chatless import lunchero_dynamo
 
 log = logging.getLogger()
@@ -26,6 +27,10 @@ Here is a rundown of what I can do (simply write *direct message or @mention me*
     *`show vote`* -> show current votes
 """
     return help_string
+
+@chatless.match(r"^experiment")
+def exprimental(bot_event):
+    return pupp.get_urls(["https://www.facebook.com/Pizza-pasta-basta-278942949312857/"])
 
 @chatless.match(r"show\s*places?\s*")
 def show_place(bot_event):
