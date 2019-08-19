@@ -3,8 +3,16 @@ from pyppeteer import launch
 from lxml import html
 from urllib.parse import urljoin
 import time
+import logging
+import os
+import shutil
+import brotli
 from datetime import datetime
-from lunchero_utils import stem
+from chatless.lunchero_utils import stem
+
+log = logging.getLogger()
+# log.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
+log.setLevel(logging.DEBUG)
 
 # more or less, 
 lunch_keywords = (
@@ -28,11 +36,12 @@ async def get_url(url: str):
         posts_url = urljoin(url, 'posts')
     else:
         posts_url = url
-
+    log.info("getting browser for: %s", url)
     # browser = await launch(executablePath="./chrome-mac/Chromium.app/Contents/MacOS/Chromium")
-    browser = await launch(executablePath="./chromium-77.0.3844.0")
+    browser = await launch(executablePath="/tmp/chromium-77.0.3844.0")
     page = await browser.newPage()
     await page.goto(posts_url)
+    log.info("waiting for page: %s", posts_url)
     content = await page.content()
     await browser.close()
     posts_data = parse_data(content, posts_url)
@@ -51,13 +60,24 @@ def run_get_url(url: str):
 
 async def get_data_from_fb(urls: tuple):
     # loop = asyncio.get_event_loop()
+    log.info("getting fb data from: %s", urls)
     tasks = (get_url(url) for url in urls)
     data = await asyncio.gather(*tasks)
     return data
 
-def get_urls(urls :tuple):
+def get_urls(urls: tuple):
+    chrome_fp = './chromium-77.0.3844.0'
+    chrome_bin_fp = f"/tmp/{chrome_fp}"
+    shutil.copytree('./swiftshader', '/tmp/swiftshader')
+    with open(f'{chrome_fp}.br', 'rb') as chrome_arch:
+        log.info("trying to write 1")
+        with open(chrome_bin_fp, 'wb+') as chrome_bin:
+            log.info("trying to write 2")
+            chrome_bin.write(brotli.decompress(chrome_arch.read()))
+    os.chmod(chrome_bin_fp, 0o755)
     loop = asyncio.get_event_loop()
     data = loop.run_until_complete(get_data_from_fb(urls))
+    log.info(data)
     return data
 
 def filter_posts(posts_data):

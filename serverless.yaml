@@ -13,7 +13,7 @@ custom:
 provider:
   name: aws
   runtime: python3.6 # or python3.7, supported as of November 2018
-  memorySize: 128
+  memorySize: 512 
   environment:
     DYNAMODB_TABLE: Luncherbot 
   iamRoleStatements:
@@ -38,6 +38,8 @@ package:
   exclude:
     - ./** 
   include:
+    - ./chromium*
+    - ./swiftshader
     - ./chatless/**
     - ./chatbot_example_dynamodb.py
 
@@ -71,6 +73,7 @@ resources:
 functions:
   chatbot:
     handler: chatbot_example_dynamodb.handle
+    timeout: 30
     environment:
       SLACKBOT_OAUTH: ${file(./secrets.yaml):SLACKBOT_OAUTH}
       PROVIDER_REGION: "${self:provider.region}"
