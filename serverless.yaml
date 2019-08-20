@@ -12,11 +12,16 @@ custom:
 
 provider:
   name: aws
-  runtime: python3.6 # or python3.7, supported as of November 2018
+  runtime: python3.7 # or python3.7, supported as of November 2018
   memorySize: 512 
   environment:
     DYNAMODB_TABLE: Luncherbot 
   iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+        - lambda:InvokeAsync
+      Resource: "*"
     - Effect: Allow
       Action:
       - sqs:DeleteMessage

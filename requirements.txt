@@ -1,3 +1,4 @@
 pyppeteer
 lxml
 brotli
+cssselect

@@ -31,7 +31,13 @@ Here is a rundown of what I can do (simply write *direct message or @mention me*
 @chatless.match(r"^experiment")
 def exprimental(bot_event):
     log.info("EXPERIMENTAL FEATURE")
-    return pupp.get_urls(["https://www.facebook.com/Pizza-pasta-basta-278942949312857/"])
+    #places = lunchero_dynamo.get_places()
+    data = pupp.run(("https://www.facebook.com/Restauracja-Krowa-i-Kurczak-757603270918750/",))
+    log.info(data)
+    msg = data[1].get('post_url')
+    if msg is not None:
+        msg = data[1].get('post_text')
+    return msg
 
 @chatless.match(r"show\s*places?\s*")
 def show_place(bot_event):
@@ -97,9 +103,5 @@ def count_votes(ballot):
 
 def handle(event, context):
     log.info("EVENT receive: %s \n CONTEXT: %s", event, dir(context))
-    try:
-        response = chatless.handle(event)
-    except Exception as e:
-        log.error("Exception occured %s", e.message)
-        response = None
+    response = chatless.handle(event)
     return response
