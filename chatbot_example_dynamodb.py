@@ -33,11 +33,10 @@ def exprimental(bot_event):
     log.info("EXPERIMENTAL FEATURE")
     #places = lunchero_dynamo.get_places()
     data = pupp.run(("https://www.facebook.com/Restauracja-Krowa-i-Kurczak-757603270918750/",))
-    log.info(data)
-    msg = data[1].get('post_url')
-    if msg is not None:
-        msg = data[1].get('post_text')
-    return msg
+    # msg = data[1].get('post_url')
+    # if msg is not None:
+    #     msg = data[1].get('post_text')
+    return data
 
 @chatless.match(r"show\s*places?\s*")
 def show_place(bot_event):

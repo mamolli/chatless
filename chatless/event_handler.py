@@ -19,7 +19,7 @@ log.setLevel(logging.DEBUG)
 
 def handle_message(bot_event, bot_ouath, slack_url):
     if is_bot_message(bot_event):
-        log.info('Ignoring messege from other bots.')
+        log.info('Ignoring message from other bots.')
         return
 
     log.info("message received, nonbot")
@@ -50,8 +50,9 @@ def handle_event(event, bot_ouath=ENV_OAUTH, slack_url=ENV_SLACKURL):
         sqs.delete_message(QueueUrl=q_url, ReceiptHandle=unwrap_q_msg.get("receiptHandle"))
         try:
             handle_message(bot_event, bot_ouath, slack_url)
-        except Exception:
-            pass
+        except Exception as e:
+            log.error("Horrible error occured: %s", e)
+            raise e
     else:
         bot_event = load_body(event)
         # TODO:unhardcode

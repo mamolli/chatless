@@ -8,7 +8,20 @@ import asyncio
 from datetime import datetime
 from chatless.lunchero_utils import stem
 
-# from pyppeteer import launch
+# try:
+#     from pyppeteer import launch
+
+#     def get_html_p(url):
+#         async def helper_(url):
+#             browser = await launch()
+#             page = await browser.newPage()
+#             await page.goto(url)
+#             content = await page.content()
+#             await browser.close()
+#             return content
+#         return asyncio.run(helper_(url))
+# except Exception:
+#     pass
 
 log = logging.getLogger()
 # log.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
@@ -31,15 +44,7 @@ urls = (
     'https://www.facebook.com/Restauracja-Krowa-i-Kurczak-757603270918750/',
     "https://www.facebook.com/Pizza-pasta-basta-278942949312857/"
 )
-# def get_html_p(url):
-#     async def helper_(url):
-#         browser = await launch()
-#         page = await browser.newPage()
-#         await page.goto(url)
-#         content = await page.content()
-#         await browser.close()
-#         return content
-#     return asyncio.run(helper_(url))
+
 
 def get_html_l(url):
     client = boto3.client("lambda")
@@ -63,19 +68,20 @@ def get_url(url: str):
     log.error("Content %s", content[:200])
     posts_data = parse_data(content, posts_url)
     log.info("Getting posts data %s", posts_data)
-    return (url, next(iter(posts_data), None))
+    return (url, posts_data)
 
-def parse_data(html_content, post_url):
+def parse_data(html_content, posts_url):
     lhtml = html.fromstring(html_content)
     log.info(dir(lhtml))
     post_links = lhtml.cssselect('.timestampContent')
-    posts_data = (extract_post_data(post_link, post_url) for post_link in post_links)
+    posts_data = (extract_post_data(post_link, posts_url) for post_link in post_links)
     posts_data = filter_posts(posts_data)
     return posts_data
 
 def run(urls: tuple):
     log.info("Starting async loop")
-    return asyncio.get_event_loop().run_until_complete(get_data_from_fb(urls))
+    # return asyncio.get_event_loop().run_until_complete(get_url(urls[0]))
+    return asyncio.run(get_data_from_fb(urls))
 
 async def get_data_from_fb(urls: tuple):
     # loop = asyncio.get_event_loop()
@@ -110,7 +116,7 @@ def extract_post_data(post_link, fb_url):
     post_epoch = time.mktime(time.gmtime(int(post_epoch))) if post_epoch else None
     post_utc_iso = datetime.fromtimestamp(post_epoch).isoformat()
     # sadly post_url can be null
-    log.info(dir(link))
+    # log.info(dir(link))
     post_link_url = urljoin(fb_url, link.attrib.get('href')) if link else None
     post_text = post.text_content()
 
