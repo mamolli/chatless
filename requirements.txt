@@ -1,4 +1,0 @@
-pyppeteer
-lxml
-brotli
-cssselect

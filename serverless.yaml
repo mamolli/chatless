@@ -2,8 +2,8 @@ service: chatbot-serverless
 
 frameworkVersion: ">=1.2.0 <2.0.0"
 
-plugins:
-  - serverless-python-requirements
+# plugins:
+#   - serverless-python-requirements
 
 custom:
   sqs: ${opt:region, self:provider.region}-queue 

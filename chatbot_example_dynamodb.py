@@ -32,11 +32,18 @@ Here is a rundown of what I can do (simply write *direct message or @mention me*
 def exprimental(bot_event):
     log.info("EXPERIMENTAL FEATURE")
     #places = lunchero_dynamo.get_places()
-    data = pupp.run(("https://www.facebook.com/Restauracja-Krowa-i-Kurczak-757603270918750/",))
-    # msg = data[1].get('post_url')
-    # if msg is not None:
-    #     msg = data[1].get('post_text')
-    return data
+    data = pupp.run(("https://www.facebook.com/Restauracja-Krowa-i-Kurczak-757603270918750/",
+                     "https://www.facebook.com/Pizza-pasta-basta-278942949312857/"))
+    msg = ""
+    for item in data:
+        fb_link, posts = item
+        for post in posts:
+            link = post.get('link')
+            if link:
+                msg += link
+            else:
+                msg += post.get('text')
+    return msg
 
 @chatless.match(r"show\s*places?\s*")
 def show_place(bot_event):
