@@ -50,7 +50,7 @@ def get_html_l(url):
     client = boto3.client("lambda")
     response = client.invoke(
         FunctionName=SCRAPPER_ARN,
-        InvocationType='RequestResponse',
+        InvocationType='Event',
         Payload=json.dumps({'queryStringParameters': {'url': url}})
     )
     data = response['Payload'].read()
