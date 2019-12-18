@@ -2,8 +2,8 @@ service: chatbot-serverless
 
 frameworkVersion: ">=1.2.0 <2.0.0"
 
-plugins:
-  - serverless-python-requirements
+# plugins:
+#   - serverless-python-requirements
 
 custom:
   sqs: ${opt:region, self:provider.region}-queue 
@@ -12,11 +12,16 @@ custom:
 
 provider:
   name: aws
-  runtime: python3.6 # or python3.7, supported as of November 2018
-  memorySize: 128
+  runtime: python3.7 # or python3.7, supported as of November 2018
+  memorySize: 512 
   environment:
     DYNAMODB_TABLE: Luncherbot 
   iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+        - lambda:InvokeAsync
+      Resource: "*"
     - Effect: Allow
       Action:
       - sqs:DeleteMessage
@@ -38,6 +43,8 @@ package:
   exclude:
     - ./** 
   include:
+    - ./chromium*
+    - ./swiftshader
     - ./chatless/**
     - ./chatbot_example_dynamodb.py
 
@@ -71,6 +78,7 @@ resources:
 functions:
   chatbot:
     handler: chatbot_example_dynamodb.handle
+    timeout: 30
     environment:
       SLACKBOT_OAUTH: ${file(./secrets.yaml):SLACKBOT_OAUTH}
       PROVIDER_REGION: "${self:provider.region}"
