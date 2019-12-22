@@ -1,21 +1,28 @@
-service: chatbot-serverless
+service: chatless-example
 
 frameworkVersion: ">=1.2.0 <2.0.0"
 
+<<<<<<< HEAD
+=======
 # plugins:
 #   - serverless-python-requirements
 
+>>>>>>> master
 custom:
-  sqs: ${opt:region, self:provider.region}-queue 
-  pythonRequirements:
-    dockerizePip: true
-
+  app_name: chatless
+  sqs_name: ${self:custom.app_name}-sqs
+ 
 provider:
   name: aws
+<<<<<<< HEAD
+  runtime: python3.6 # or python3.7, supported as of November 2018
+  memorySize: 128
+=======
   runtime: python3.7 # or python3.7, supported as of November 2018
   memorySize: 512 
   environment:
     DYNAMODB_TABLE: Luncherbot 
+>>>>>>> master
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -28,16 +35,7 @@ provider:
       - sqs:ReceiveMessage
       - sqs:SendMessage
       - sqs:SendMessageBatch
-      Resource: "arn:aws:sqs:*:*:${self:custom.sqs}"
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+      Resource: "arn:aws:sqs:*:*:${self:custom.sqs_name}"
 
 package:
   exclude:
@@ -46,57 +44,36 @@ package:
     - ./chromium*
     - ./swiftshader
     - ./chatless/**
-    - ./chatbot_example_dynamodb.py
 
 resources:
   Resources:
-    Messages:
+    BufferQueue:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: ${self:custom.sqs}
+        QueueName: ${self:custom.sqs_name}
         MessageRetentionPeriod: 12000
         VisibilityTimeout: 60
-    LuncherbotDynamoDbTable: 
-      Type: AWS::DynamoDB::Table
-      DeletionPolicy: Delete
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-          - AttributeName: sortkey
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-          - AttributeName: sortkey
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        TableName: ${self:provider.environment.DYNAMODB_TABLE}
 
 functions:
   chatbot:
+<<<<<<< HEAD
+    handler: chatless.chatbot_example.handle
+=======
     handler: chatbot_example_dynamodb.handle
     timeout: 30
+>>>>>>> master
     environment:
-      SLACKBOT_OAUTH: ${file(./secrets.yaml):SLACKBOT_OAUTH}
+      SLACKBOT_OAUTH: 'xoxb-3360794059-669882893493-7MejyIqpXvJLCgGna42MRmAj'
       PROVIDER_REGION: "${self:provider.region}"
-      DYNAMODB_TABLE: "${self:provider.environment.DYNAMODB_TABLE}"
       SQS_QUEUE:
-        Ref: Messages
+        Ref: BufferQueue
     events:
       - http:
           path: chat
           method: post
-      # Figure out how to pass jsons, any way it seems very backwards
-      # - schedule:
-      #     rate: rate(4 minutes)
-      #     enabled: true
-      #     input: "{ \"body\": \"{\"event\": {\"channel\": \"DKHFFP7HP\", \"text\": \"show place\"}}\" }"
       - sqs:
           arn:
             Fn::GetAtt:
-              - Messages
+              - BufferQueue
               - Arn
 
