@@ -21,3 +21,4 @@ jobs:
       run: |
         python -m pip install --upgrade pipenv
         pipenv install --dev
+        pipenv run make test
