@@ -17,7 +17,6 @@ def show_help(bot_event):
 
 def handle(event, context):
     return chatless.handle(event)
-
 ```
 
 Basically you need one function bound to your lambda.
