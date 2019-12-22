@@ -5,3 +5,4 @@
 .serverless/*
 **/*.log
 **/*cache
+**/__pycache__
