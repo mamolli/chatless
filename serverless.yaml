@@ -1,0 +1,54 @@
+service: chatless-example
+
+frameworkVersion: ">=1.2.0 <2.0.0"
+
+custom:
+  app_name: chatless
+  sqs_name: ${self:custom.app_name}-sqs
+ 
+provider:
+  name: aws
+  runtime: python3.6 # or python3.7, supported as of November 2018
+  memorySize: 128
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+      - sqs:DeleteMessage
+      - sqs:ReceiveMessage
+      - sqs:SendMessage
+      - sqs:SendMessageBatch
+      Resource: "arn:aws:sqs:*:*:${self:custom.sqs_name}"
+
+package:
+  exclude:
+    - ./** 
+  include:
+    - ./chatless/**
+
+resources:
+  Resources:
+    BufferQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.sqs_name}
+        MessageRetentionPeriod: 12000
+        VisibilityTimeout: 60
+
+functions:
+  chatbot:
+    handler: chatless.chatbot_example.handle
+    environment:
+      SLACKBOT_OAUTH: 'xoxb-3360794059-669882893493-7MejyIqpXvJLCgGna42MRmAj'
+      PROVIDER_REGION: "${self:provider.region}"
+      SQS_QUEUE:
+        Ref: BufferQueue
+    events:
+      - http:
+          path: chat
+          method: post
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - BufferQueue
+              - Arn
+
