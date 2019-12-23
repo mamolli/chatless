@@ -2,27 +2,14 @@ service: chatless-example
 
 frameworkVersion: ">=1.2.0 <2.0.0"
 
-<<<<<<< HEAD
-=======
-# plugins:
-#   - serverless-python-requirements
-
->>>>>>> master
 custom:
   app_name: chatless
   sqs_name: ${self:custom.app_name}-sqs
  
 provider:
   name: aws
-<<<<<<< HEAD
   runtime: python3.6 # or python3.7, supported as of November 2018
   memorySize: 128
-=======
-  runtime: python3.7 # or python3.7, supported as of November 2018
-  memorySize: 512 
-  environment:
-    DYNAMODB_TABLE: Luncherbot 
->>>>>>> master
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -44,6 +31,7 @@ package:
     - ./chromium*
     - ./swiftshader
     - ./chatless/**
+    - ./chatbot_example.py
 
 resources:
   Resources:
@@ -56,12 +44,7 @@ resources:
 
 functions:
   chatbot:
-<<<<<<< HEAD
-    handler: chatless.chatbot_example.handle
-=======
-    handler: chatbot_example_dynamodb.handle
-    timeout: 30
->>>>>>> master
+    handler: chatbot_example.handle
     environment:
       SLACKBOT_OAUTH: 'xoxb-3360794059-669882893493-7MejyIqpXvJLCgGna42MRmAj'
       PROVIDER_REGION: "${self:provider.region}"
