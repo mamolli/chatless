@@ -57,7 +57,7 @@ def handle(event, bot_ouath=ENV_OAUTH, slack_url=ENV_SLACKURL):
         handle_message(bot_event, bot_ouath, slack_url)
     else:
         sqs.send_message(QueueUrl=SQS_URL, MessageBody=json.dumps(bot_event))
-    
+
     # in general, if we got ok data, we reply all went well, otherwise slack will retry
     return respond(STATUS_OK, {})
 
