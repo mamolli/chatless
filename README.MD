@@ -1,3 +1,5 @@
+https://github.com/mamolli/chatless/workflows/<WORKFLOW_NAME>/badge.svg
+
 # Chatless - chatbot router-framework for slack, python3 & AWS-Lambda
 
 ## Quickstart
