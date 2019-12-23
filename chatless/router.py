@@ -8,11 +8,10 @@ log = logging.getLogger()
 # log.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
 log.setLevel(logging.DEBUG)
 
-# avoid OOP at all costs
 def default(action):
     def fu(*args, **kwargs):
         return action(*args, **kwargs)
-    # hate this so much, however it is easiest apraoch atm
+    # hate this so much, however it is cleanest apraoch atm
     global DEFAULT_FUNCTION
     DEFAULT_FUNCTION = fu
     return fu
