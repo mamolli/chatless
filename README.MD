@@ -1,5 +1,5 @@
 ![](https://github.com/mamolli/chatless/workflows/ci/badge.svg) 
-# Chatless - simple python3 aws lambda chatbot router
+# Chatless - simple python3 aws lambda slackbot router
 ## Quickstart
 
 For your first bot you basically need 2 files.
