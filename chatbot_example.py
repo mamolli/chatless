@@ -5,6 +5,5 @@ import chatless
 def show_help(bot_event):
     return "help shown here"
 
-
 def handle(event, context):
     return chatless.handle(event)

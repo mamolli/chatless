@@ -46,7 +46,7 @@ functions:
   chatbot:
     handler: chatbot_example.handle
     environment:
-      SLACKBOT_OAUTH: 'xoxb-3360794059-669882893493-7MejyIqpXvJLCgGna42MRmAj'
+      SLACKBOT_OAUTH: 'xoxb-648247024770-649400097058-0Ht98h1THdLrrL25478ie6Zh'
       PROVIDER_REGION: "${self:provider.region}"
       SQS_QUEUE:
         Ref: BufferQueue
