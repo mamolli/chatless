@@ -1,4 +1,4 @@
-![](https://github.com/mamolli/chatless/workflows/ci/badge.svg) 
+![https://github.com/mamolli/chatless/actions](https://github.com/mamolli/chatless/workflows/ci/badge.svg) 
 # Chatless - simple python3 aws lambda slackbot router
 
 More info on deployment later. Need to rethink integration tests.
