@@ -1,12 +1,15 @@
 ![](https://github.com/mamolli/chatless/workflows/ci/badge.svg) 
 # Chatless - simple python3 aws lambda slackbot router
+
+More info on deployment later. Need to rethink integration tests.
+
 ## Quickstart
 
 For your first bot you basically need 2 files.
-* `bot.py` -> your simple bot
+* `chatbot_example.py` -> your simple bot
 * `serverless.yaml` -> your serverless config file
 
-### `bot.py`
+### `chatbot_example.py`
 ```
 import chatless
 
