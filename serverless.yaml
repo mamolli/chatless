@@ -5,7 +5,8 @@ frameworkVersion: ">=1.2.0 <2.0.0"
 custom:
   app_name: chatless
   sqs_name: ${self:custom.app_name}-sqs
- 
+  secrets: 	"${file(./secrets.yaml)}"
+
 provider:
   name: aws
   runtime: python3.6 # or python3.7, supported as of November 2018
@@ -46,7 +47,7 @@ functions:
   chatbot:
     handler: chatbot_example.handle
     environment:
-      SLACKBOT_OAUTH: 'xoxb-648247024770-649400097058-0Ht98h1THdLrrL25478ie6Zh'
+      SLACKBOT_OAUTH: 	"${self:custom.secrets.SLACKBOT_OAUTH}"
       PROVIDER_REGION: "${self:provider.region}"
       SQS_QUEUE:
         Ref: BufferQueue

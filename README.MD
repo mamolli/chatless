@@ -20,6 +20,13 @@ def handle(event, context):
 
 ```
 
+Why serverless?
+Couple of reasons:
+ - nice abstraction over aws lambda(not only) / sam templates are ok, but sls is much more succinct, especially with other resources such as sqs
+ - easy deployment / sls translates to Cloudformation, so debug is also possible
+ - logging / quickly obtain logs from your function
+
+
 Basically you need one function bound to your lambda.
 See `serverless.yaml` to see a simple setup.
 This function `def handle(event, context):` is basically your lambdas app entry point.

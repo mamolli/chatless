@@ -2,7 +2,7 @@ import chatless
 
 @chatless.default
 @chatless.match(r"/hi|hello|man|help|docs/")
-def show_help(bot_event):
+def default(bot_event):
     return "help shown here"
 
 def handle(event, context):
